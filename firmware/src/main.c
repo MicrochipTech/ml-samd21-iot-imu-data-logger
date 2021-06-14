@@ -124,14 +124,27 @@ int main ( void )
             break;
         }
         
-        printf("sensor sample rate set at %dHz\r\n", SNSR_SAMPLE_RATE);
-        tickrate = TICK_RATE_SLOW;
-        
+        printf("sensor type is %s\r\n", SNSR_NAME);
+        printf("sensor sample rate set at %d%s\r\n", SNSR_SAMPLE_RATE, SNSR_SAMPLE_RATE_UNIT_STR);
+#if SNSR_USE_ACCEL
+        printf("accelerometer axes %s%s%s enabled with range set at +/-%dGs\r\n", SNSR_USE_ACCEL_X ? "x" : "", SNSR_USE_ACCEL_Y ? "y" : "", SNSR_USE_ACCEL_Z ? "z" : "", SNSR_ACCEL_RANGE);
+#else
+        printf("accelerometer disabled\r\n");
+#endif
+#if SNSR_USE_GYRO
+        printf("gyrometer axes %s%s%s enabled with range set at %dDPS\r\n", SNSR_USE_GYRO_X ? "x" : "", SNSR_USE_GYRO_Y ? "y" : "", SNSR_USE_GYRO_Z ? "z" : "", SNSR_GYRO_RANGE);
+#else
+        printf("gyrometer disabled\r\n");
+#endif
+        buffer_reset(&snsr_buffer);
         break;
     }
     
     while (1)
     {
+        /* Maintain state machines of all polled MPLAB Harmony modules. */
+        SYS_Tasks ( );
+        
         if (sensor.status != SNSR_STATUS_OK) {
             printf("Got a bad sensor status: %d\r\n", sensor.status);
             break;
@@ -141,14 +154,14 @@ int main ( void )
             
             // Light the LEDs to indicate overflow
             tickrate = 0;
-            LED_YELLOW_On();  // Indicate OVERFLOW
+            LED_ALL_Off();
+            LED_YELLOW_On(); LED_RED_On();  // Indicate OVERFLOW
             sleep_ms(5000U);
-            LED_YELLOW_Off(); // Clear OVERFLOW
-            tickrate = TICK_RATE_SLOW;
+            LED_ALL_Off(); // Clear OVERFLOW
             
-            buffer_reset(&snsr_buffer);
+            buffer_reset(&snsr_buffer); 
             continue;
-        }  
+        }     
         else {
             // Feed temp buffer
             buffer_data_t *ptr;
@@ -172,13 +185,13 @@ int main ( void )
                 }
                 printf("\r\n");
 #endif
-                ptr += SNSR_NUM_AXES;
                 buffer_advance_read_index(&snsr_buffer, 1);
+                ptr += SNSR_NUM_AXES;
             }
         }
         
     }
-    
+        
     tickrate = 0;
     LED_GREEN_Off();
     LED_RED_On();

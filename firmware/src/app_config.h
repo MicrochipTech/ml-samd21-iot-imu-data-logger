@@ -1,33 +1,33 @@
-/* Microchip Technology Inc. and its subsidiaries.  You may use this software 
- * and any derivatives exclusively with Microchip products. 
- * 
- * THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS".  NO WARRANTIES, WHETHER 
- * EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED 
- * WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A 
- * PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION 
- * WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION. 
+/* Microchip Technology Inc. and its subsidiaries.  You may use this software
+ * and any derivatives exclusively with Microchip products.
  *
- * IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE, 
- * INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND 
- * WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS 
- * BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE.  TO THE 
- * FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS 
- * IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF 
+ * THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS".  NO WARRANTIES, WHETHER
+ * EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
+ * WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
+ * PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
+ * WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
+ *
+ * IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+ * INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+ * WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
+ * BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE.  TO THE
+ * FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS
+ * IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF
  * ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
  *
- * MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE 
- * TERMS. 
+ * MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
+ * TERMS.
  */
 
-/* 
- * File:   
- * Author: 
+/*
+ * File:
+ * Author:
  * Comments:
- * Revision history: 
+ * Revision history:
  */
 
 // This is a guard condition so that contents of this file are not included
-// more than once.  
+// more than once.
 #ifndef APP_CONFIG_H
 #define	APP_CONFIG_H
 
@@ -45,14 +45,20 @@
 
 #define MPDV_START_OF_FRAME     0xA5U   // Frame header byte for MPLAB DV
 
-// IMU sampling rate in Hz
+// IMU sampling rate in units of SNSR_SAMPLE_RATE_UNIT
 // For BMI160:
-//  Use one of 25, 50, 100, 200, 400, 800, or 1600
-// For ICM42688:
-//  Use one of 25, 50, 100, 200, 500
-// !NB! Increasing the sample rate above 200Hz with all 6 axes may cause buffer overruns
-// Change at your own risk!
+//  - set SNSR_SAMPLE_RATE_UNIT to SNSR_SAMPLE_RATE_UNIT_HZ
+//  - set SNSR_SAMPLE_RATE to one of: 25, 50, 100, 200, 400, 800, or 1600
+// For ICM42688 < 1kHz range:
+//  - set SNSR_SAMPLE_RATE_UNIT to SNSR_SAMPLE_RATE_UNIT_HZ
+//  - set SNSR_SAMPLE_RATE to one of: 25, 50, 100, 200, or 500
+// For ICM42688 >= 1kHz range:
+//  - set SNSR_SAMPLE_RATE_UNIT to SNSR_SAMPLE_RATE_UNIT_KHZ
+//  - set SNSR_SAMPLE_RATE to one of: 1, 2, 4, 8, or 16
+// !NB! Increasing the sample rate above 200Hz with all 6 axes when using one
+// of the data logging builds may cause buffer overruns - Change at your own risk!
 #define SNSR_SAMPLE_RATE        100
+#define SNSR_SAMPLE_RATE_UNIT   SNSR_SAMPLE_RATE_UNIT_HZ // HZ or KHZ
 
 // Accelerometer range in Gs
 #define SNSR_ACCEL_RANGE        16
@@ -60,7 +66,7 @@
 // Gyro range in DPS
 #define SNSR_GYRO_RANGE         2000
 
-#define SNSR_BUF_LEN            256
+#define SNSR_BUF_LEN            64
 
 // stream sensor data type natively
 #define SNSR_DATA_TYPE          int16_t
@@ -99,6 +105,8 @@
 
 #if (DATA_LOGGER_BUILD && DATA_VISUALIZER_BUILD)
     #error "Only one of DATA_LOGGER_BUILD or DATA_VISUALIZER_BUILD may be set"
+#elif !(DATA_LOGGER_BUILD || DATA_VISUALIZER_BUILD)
+    #error "Neither one of DATA_LOGGER_BUILD or DATA_VISUALIZER_BUILD has been set"
 #endif
 
 // Provide the functions needed by sensor module
@@ -116,15 +124,23 @@
 #define LED_RED_Off     LED_RED_Set
 #define LED_YELLOW_On   LED_YELLOW_Clear
 #define LED_YELLOW_Off  LED_YELLOW_Set
+#define LED_ALL_On()      do { LED_YELLOW_On(); LED_GREEN_On(); LED_RED_On(); LED_BLUE_On(); } while (0)
+#define LED_ALL_Off()     do { LED_YELLOW_Off(); LED_GREEN_Off(); LED_RED_Off(); LED_BLUE_Off(); } while (0)
 #define MIKRO_EIC_PIN   EIC_PIN_12
+
+#define SNSR_SAMPLE_RATE_UNIT_STR ((SNSR_SAMPLE_RATE_UNIT == SNSR_SAMPLE_RATE_UNIT_KHZ) ? "kHz" : "Hz")
+#ifdef SNSR_TYPE_BMI160
+#define SNSR_NAME "bmi160"
+#elif SNSR_TYPE_ICM42688
+#define SNSR_NAME "icm42688"
+#endif
 
 #ifdef	__cplusplus
 extern "C" {
 #endif /* __cplusplus */
-    
+
 #ifdef	__cplusplus
 }
 #endif /* __cplusplus */
 
 #endif	/* APP_CONFIG_H */
-

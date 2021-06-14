@@ -46,6 +46,9 @@
 #define SNSR_TYPE_ICM42688  0
 #endif
 
+#define SNSR_SAMPLE_RATE_UNIT_HZ    0
+#define SNSR_SAMPLE_RATE_UNIT_KHZ   1
+
 // high level sensor configuration defined in app_config header
 #include "app_config.h"
 

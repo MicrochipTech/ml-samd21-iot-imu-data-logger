@@ -44,6 +44,9 @@
 #include "definitions.h"
 
 // Macro function to get the proper Macro defines corresponding to SNSR_SAMPLE_RATE
+#if (SNSR_SAMPLE_RATE_UNIT == SNSR_SAMPLE_RATE_UNIT_KHZ)
+    #error "BMI160 driver doesn't support sample rate units in kHZ; use SNSR_SAMPLE_RATE_UNIT_HZ instead"
+#endif
 #define __SNSRSAMPLERATEMACRO(x, y) BMI160_ ## x ## _ODR_ ## y ## HZ
 #define _SNSRSAMPLERATEEXPR(x, y) __SNSRSAMPLERATEMACRO(x, y)
 #define _GET_IMU_SAMPLE_RATE_MACRO(x) _SNSRSAMPLERATEEXPR(x, SNSR_SAMPLE_RATE)
