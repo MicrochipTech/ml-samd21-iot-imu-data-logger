@@ -21,6 +21,12 @@ children:
   - type: KeyValueSet
     attributes: {id: SERCOM_MODE}
     children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: readOnly}
+        children:
+        - {type: Value, value: 'true'}
     - type: Values
       children:
       - type: Dynamic
@@ -103,7 +109,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: sercom5, value: 'false'}
+        attributes: {id: sercom5, value: 'true'}
   - type: Boolean
     attributes: {id: USART_LIN_MASTER_SUPPORTED}
     children:
@@ -124,6 +130,8 @@ children:
       children:
       - type: Dynamic
         attributes: {id: sercom5, value: '0'}
+      - type: User
+        attributes: {value: '1'}
   - type: Boolean
     attributes: {id: USART_RING_BUFFER_ENABLE}
     children:

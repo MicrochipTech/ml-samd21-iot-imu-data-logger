@@ -5,10 +5,10 @@ frameworkPath: ../../Microchip/Harmony3
 processor: ATSAMD21G18A
 projectName: ''
 settings:
-  PackageFilter: crypto;net;core;touch;bsp;quick_docs;usb;wireless;csp;gfx;gfx_apps_sam_d5x_e5x
+  PackageFilter: audio;bsp;core;csp;gfx;quick_docs;usb
   FORCE_OPTIMIZATION: 'false'
   GENERATE_BACKUP: 'true'
   TRUSTZONE: 'false'
-  CMSISPath: ./dev_packs/arm/CMSIS/5.7.0
+  CMSISPath: .\dev_packs\arm\CMSIS\5.7.0
   MERGE_STRATEGY: OVERWRITE
-  DFPPath: ./dev_packs/Microchip/SAMD21_DFP/3.4.116/samd21a/atdf/ATSAMD21G18A.atdf
+  DFPPath: .\dev_packs\Microchip\SAMD21_DFP\3.4.116\samd21a\atdf\ATSAMD21G18A.atdf

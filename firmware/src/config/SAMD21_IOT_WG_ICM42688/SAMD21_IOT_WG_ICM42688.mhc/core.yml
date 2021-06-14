@@ -485,21 +485,21 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: 'false'}
+        attributes: {id: core, value: 'true'}
   - type: String
     attributes: {id: NVIC_14_0_HANDLER}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: SERCOM5_Handler}
+        attributes: {id: core, value: SERCOM5_USART_InterruptHandler}
   - type: Boolean
     attributes: {id: NVIC_14_0_HANDLER_LOCK}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: 'false'}
+        attributes: {id: core, value: 'true'}
   - type: Boolean
     attributes: {id: NVIC_18_0_ENABLE}
     children:
@@ -1689,28 +1689,28 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: sercom5, value: 'false'}
+        attributes: {id: sercom5, value: 'true'}
   - type: Boolean
     attributes: {id: SERCOM5_INTERRUPT_ENABLE_UPDATE}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: 'true'}
+        attributes: {id: core, value: 'false'}
   - type: String
     attributes: {id: SERCOM5_INTERRUPT_HANDLER}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: sercom5, value: SERCOM5_Handler}
+        attributes: {id: sercom5, value: SERCOM5_USART_InterruptHandler}
   - type: Boolean
     attributes: {id: SERCOM5_INTERRUPT_HANDLER_LOCK}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: sercom5, value: 'false'}
+        attributes: {id: sercom5, value: 'true'}
   - type: File
     attributes: {id: SYSTICK_FILE_0}
     children:
