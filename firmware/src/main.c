@@ -172,12 +172,14 @@ int main ( void )
                 uint8_t headerbyte = MPDV_START_OF_FRAME;
                 
                 SERCOM5_USART_Write(&headerbyte, 1);
-                
+                while (SERCOM5_USART_WriteIsBusy()) { };
+
                 SERCOM5_USART_Write(ptr, SNSR_NUM_AXES*sizeof(buffer_data_t));
+                while (SERCOM5_USART_WriteIsBusy()) { };
                 
                 headerbyte = ~headerbyte;
                 SERCOM5_USART_Write(&headerbyte, 1);
-                headerbyte = ~headerbyte;
+                while (SERCOM5_USART_WriteIsBusy()) { };
 #elif DATA_LOGGER_BUILD
                 printf("%d", ptr[0]);
                 for (int j=1; j < SNSR_NUM_AXES; j++) {

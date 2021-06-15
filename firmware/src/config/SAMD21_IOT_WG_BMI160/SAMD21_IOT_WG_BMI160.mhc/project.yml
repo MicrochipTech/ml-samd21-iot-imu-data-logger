@@ -76,13 +76,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: ACA71599E8685D8BB3066249F0BF69DA
-- generatedChecksum: 13A22E37EDB5475D57C26E6A13275A42
+- generatedChecksum: 49D87ACB09E96E674DA6BC2ED2C2E9C4
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/sercom/usart
   name: plib_sercom5_usart.c
   physicalPath: peripheral/sercom/usart
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 13A22E37EDB5475D57C26E6A13275A42
+  userChecksum: 49D87ACB09E96E674DA6BC2ED2C2E9C4
 - generatedChecksum: 901668A7AECAE8B7188421F4A84AD20C
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/systick
   name: plib_systick.c
