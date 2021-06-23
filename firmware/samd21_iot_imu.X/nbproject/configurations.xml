@@ -39,6 +39,10 @@
             <logicalFolder displayName="systick" name="f7" projectFiles="true">
               <itemPath>../src/config/SAMD21_IOT_WG_BMI160/peripheral/systick/plib_systick.h</itemPath>
             </logicalFolder>
+            <logicalFolder displayName="tc" name="f9" projectFiles="true">
+              <itemPath>../src/config/SAMD21_IOT_WG_BMI160/peripheral/tc/plib_tc_common.h</itemPath>
+              <itemPath>../src/config/SAMD21_IOT_WG_BMI160/peripheral/tc/plib_tc3.h</itemPath>
+            </logicalFolder>
           </logicalFolder>
           <itemPath>../src/config/SAMD21_IOT_WG_BMI160/device_cache.h</itemPath>
           <itemPath>../src/config/SAMD21_IOT_WG_BMI160/toolchain_specifics.h</itemPath>
@@ -79,6 +83,10 @@
             </logicalFolder>
             <logicalFolder displayName="systick" name="f7" projectFiles="true">
               <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/peripheral/systick/plib_systick.h</itemPath>
+            </logicalFolder>
+            <logicalFolder displayName="tc" name="f9" projectFiles="true">
+              <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/peripheral/tc/plib_tc_common.h</itemPath>
+              <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/peripheral/tc/plib_tc3.h</itemPath>
             </logicalFolder>
           </logicalFolder>
           <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/device_cache.h</itemPath>
@@ -249,6 +257,9 @@
             <logicalFolder displayName="systick" name="f7" projectFiles="true">
               <itemPath>../src/config/SAMD21_IOT_WG_BMI160/peripheral/systick/plib_systick.c</itemPath>
             </logicalFolder>
+            <logicalFolder displayName="tc" name="f9" projectFiles="true">
+              <itemPath>../src/config/SAMD21_IOT_WG_BMI160/peripheral/tc/plib_tc3.c</itemPath>
+            </logicalFolder>
           </logicalFolder>
           <logicalFolder displayName="stdio" name="f2" projectFiles="true">
             <itemPath>../src/config/SAMD21_IOT_WG_BMI160/stdio/xc32_monitor.c</itemPath>
@@ -290,6 +301,9 @@
             <logicalFolder displayName="systick" name="f7" projectFiles="true">
               <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/peripheral/systick/plib_systick.c</itemPath>
             </logicalFolder>
+            <logicalFolder displayName="tc" name="f9" projectFiles="true">
+              <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/peripheral/tc/plib_tc3.c</itemPath>
+            </logicalFolder>
           </logicalFolder>
           <logicalFolder displayName="stdio" name="f2" projectFiles="true">
             <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/stdio/xc32_monitor.c</itemPath>
@@ -324,6 +338,7 @@
         <itemPath>../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/sercom5.yml</itemPath>
         <itemPath>../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/settings.yml</itemPath>
         <itemPath>../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/stdio.yml</itemPath>
+        <itemPath>../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/tc3.yml</itemPath>
       </logicalFolder>
       <logicalFolder displayName="SAMD21_IOT_WG_ICM42688.mhc" name="f2" projectFiles="true">
         <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/cmsis.yml</itemPath>
@@ -338,6 +353,7 @@
         <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/sercom5.yml</itemPath>
         <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/settings.yml</itemPath>
         <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/stdio.yml</itemPath>
+        <itemPath>../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/tc3.yml</itemPath>
       </logicalFolder>
       <itemPath>Makefile</itemPath>
       <itemPath>../src/config/SAMD21_IOT_WG_BMI160/harmony-manifest-failure.yml</itemPath>
@@ -636,6 +652,32 @@
         <C32Global>
         </C32Global>
       </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/GraphSettings.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/cmsis.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/core.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/dfp.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/eic.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/evsys.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/nvmctrl.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/project.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/sercom0.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/sercom5.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/settings.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/stdio.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/tc3.yml">
+      </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/definitions.h">
         <C32>
         </C32>
@@ -684,6 +726,8 @@
         <C32Global>
         </C32Global>
       </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/device_vectors.h">
+      </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/exceptions.c">
         <C32>
         </C32>
@@ -731,6 +775,8 @@
         </C32CPP>
         <C32Global>
         </C32Global>
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/interrupts.h">
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/libc_syscalls.c">
         <C32>
@@ -1067,6 +1113,12 @@
         </C32CPP>
         <C32Global>
         </C32Global>
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/peripheral/tc/plib_tc3.c">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/peripheral/tc/plib_tc3.h">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/peripheral/tc/plib_tc_common.h">
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/startup_xc32.c">
         <C32>
@@ -1662,8 +1714,6 @@
       </Tool>
       <nEdbgTool>
         <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="arm.use_vtor" value="false"/>
-        <property key="arm.vtor_adr" value="exception_table"/>
         <property key="communication.activationmode" value="nohv"/>
         <property key="communication.interface" value="swd"/>
         <property key="communication.speed" value="2.000"/>
@@ -1672,7 +1722,6 @@
         <property key="firmware.toolpack" value="Press to select which tool pack to use"/>
         <property key="firmware.update.action" value="firmware.update.use.latest"/>
         <property key="freeze.timers" value="false"/>
-        <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
         <property key="memories.configurationmemory" value="true"/>
@@ -1696,9 +1745,6 @@
         <property key="programoptions.preserveprogramrange" value="false"/>
         <property key="programoptions.preserveuserid" value="false"/>
         <property key="programoptions.programuserotp" value="false"/>
-        <property key="script.log_level" value="0"/>
-        <property key="script.reset_delay" value="0"/>
-        <property key="script.show_output" value="false"/>
         <property key="toolpack.updateoptions" value="toolpack.updateoptions.uselatestoolpack"/>
         <property key="toolpack.updateoptions.packversion" value="Press to select which tool pack to use"/>
         <property key="voltagevalue" value=""/>
@@ -1716,8 +1762,8 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="SAMD21_DFP" vendor="Microchip" version="3.4.116"/>
         <pack name="CMSIS" vendor="ARM" version="5.4.0"/>
+        <pack name="SAMD21_DFP" vendor="Microchip" version="3.4.116"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -1826,6 +1872,32 @@
         <C32Global>
         </C32Global>
       </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/GraphSettings.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/cmsis.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/core.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/dfp.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/eic.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/evsys.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/nvmctrl.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/project.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/sercom1.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/sercom5.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/settings.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/stdio.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/tc3.yml">
+      </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/definitions.h">
         <C32>
         </C32>
@@ -1874,6 +1946,8 @@
         <C32Global>
         </C32Global>
       </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/device_vectors.h">
+      </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/exceptions.c">
         <C32>
         </C32>
@@ -1921,6 +1995,8 @@
         </C32CPP>
         <C32Global>
         </C32Global>
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/interrupts.h">
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/libc_syscalls.c">
         <C32>
@@ -2257,6 +2333,12 @@
         </C32CPP>
         <C32Global>
         </C32Global>
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/peripheral/tc/plib_tc3.c">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/peripheral/tc/plib_tc3.h">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/peripheral/tc/plib_tc_common.h">
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/startup_xc32.c">
         <C32>

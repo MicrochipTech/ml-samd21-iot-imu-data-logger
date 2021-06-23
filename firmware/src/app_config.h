@@ -124,8 +124,8 @@
 #define LED_RED_Off     LED_RED_Set
 #define LED_YELLOW_On   LED_YELLOW_Clear
 #define LED_YELLOW_Off  LED_YELLOW_Set
-#define LED_ALL_On()      do { LED_YELLOW_On(); LED_GREEN_On(); LED_RED_On(); LED_BLUE_On(); } while (0)
-#define LED_ALL_Off()     do { LED_YELLOW_Off(); LED_GREEN_Off(); LED_RED_Off(); LED_BLUE_Off(); } while (0)
+#define LED_ALL_On()    do { LED_YELLOW_On(); LED_GREEN_On(); LED_RED_On(); LED_BLUE_On(); } while (0)
+#define LED_ALL_Off()   do { LED_YELLOW_Off(); LED_GREEN_Off(); LED_RED_Off(); LED_BLUE_Off(); } while (0)
 #define MIKRO_EIC_PIN   EIC_PIN_12
 
 #define SNSR_SAMPLE_RATE_UNIT_STR ((SNSR_SAMPLE_RATE_UNIT == SNSR_SAMPLE_RATE_UNIT_KHZ) ? "kHz" : "Hz")

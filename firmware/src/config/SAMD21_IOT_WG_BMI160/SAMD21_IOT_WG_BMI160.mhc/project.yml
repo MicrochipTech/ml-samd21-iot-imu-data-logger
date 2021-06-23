@@ -6,20 +6,20 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: E45D1648EFC10229D7BE94DB19221FF7
-- generatedChecksum: 8B887FDD744EFCEB54B95280FFE62184
+- generatedChecksum: 7B28C61C79152B91D1D6B596B5C38E8A
   logicalPath: config/SAMD21_IOT_WG_BMI160
   name: initialization.c
   physicalPath: ''
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 8B887FDD744EFCEB54B95280FFE62184
-- generatedChecksum: 5BDCF10A11C62736A38DD1B982071E55
+  userChecksum: 7B28C61C79152B91D1D6B596B5C38E8A
+- generatedChecksum: 731900DAF10D124DF7104988BC58B33B
   logicalPath: config/SAMD21_IOT_WG_BMI160
   name: interrupts.c
   physicalPath: ''
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 5BDCF10A11C62736A38DD1B982071E55
+  userChecksum: 731900DAF10D124DF7104988BC58B33B
 - generatedChecksum: 6513F2461B8F476B68CA73906086047F
   logicalPath: config/SAMD21_IOT_WG_BMI160
   name: libc_syscalls.c
@@ -27,13 +27,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: 6513F2461B8F476B68CA73906086047F
-- generatedChecksum: 95D06AF1574902C2113B8CBA7666E34C
+- generatedChecksum: 0F969216C9C45600AEF8C7ABE085207F
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/clock
   name: plib_clock.c
   physicalPath: peripheral/clock
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 95D06AF1574902C2113B8CBA7666E34C
+  userChecksum: 0F969216C9C45600AEF8C7ABE085207F
 - generatedChecksum: 5CC7C35C3939F3032CE5E7F0987B5703
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/eic
   name: plib_eic.c
@@ -48,13 +48,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: C3ECDED3D6301DB0DE622293ED615D21
-- generatedChecksum: A041661CC3537403DBECB1A04A14E730
+- generatedChecksum: 4D04B7745E4FEDEAFDAAC1D05BC21DF9
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/nvic
   name: plib_nvic.c
   physicalPath: peripheral/nvic
   security: NON_SECURE
   type: SOURCE
-  userChecksum: A041661CC3537403DBECB1A04A14E730
+  userChecksum: 4D04B7745E4FEDEAFDAAC1D05BC21DF9
 - generatedChecksum: E85A8757F82A322C86C52D9BF238E9E1
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/nvmctrl
   name: plib_nvmctrl.c
@@ -83,13 +83,20 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: 49D87ACB09E96E674DA6BC2ED2C2E9C4
-- generatedChecksum: 901668A7AECAE8B7188421F4A84AD20C
+- generatedChecksum: B8E7D9ADF1C4AEA2903AB12F0E5F9C64
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/systick
   name: plib_systick.c
   physicalPath: peripheral/systick
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 901668A7AECAE8B7188421F4A84AD20C
+  userChecksum: B8E7D9ADF1C4AEA2903AB12F0E5F9C64
+- generatedChecksum: F0C365066536FA8581549DF457A2164A
+  logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/tc
+  name: plib_tc3.c
+  physicalPath: peripheral/tc
+  security: NON_SECURE
+  type: SOURCE
+  userChecksum: F0C365066536FA8581549DF457A2164A
 - generatedChecksum: 2645E564BD945DAED1424FD8D7B39330
   logicalPath: config/SAMD21_IOT_WG_BMI160
   name: startup_xc32.c
@@ -209,13 +216,13 @@ files:
   security: NON_SECURE
   type: HEADER
   userChecksum: 2AD9700A41DC94A60C663A17CEDB2703
-- generatedChecksum: F89D1F87B5728092F0E9E96809C6CB8C
+- generatedChecksum: 8C01761C8DED8E8935BBAECDEDC54569
   logicalPath: config/SAMD21_IOT_WG_BMI160
   name: definitions.h
   physicalPath: ''
   security: NON_SECURE
   type: HEADER
-  userChecksum: F89D1F87B5728092F0E9E96809C6CB8C
+  userChecksum: 8C01761C8DED8E8935BBAECDEDC54569
 - generatedChecksum: 7200FE37B300952D70C11DFE5DA3D6B7
   logicalPath: config/SAMD21_IOT_WG_BMI160
   name: device.h
@@ -328,13 +335,13 @@ files:
   security: NON_SECURE
   type: HEADER
   userChecksum: 4017D6C4D2082CB4A87FEFE5411B6559
-- generatedChecksum: 0518ECAFED8F14370A51F3D1EE7AAEE8
+- generatedChecksum: 4D24C4CE69F3994FB2FB8CD4A1F2C3ED
   logicalPath: config/SAMD21_IOT_WG_BMI160
   name: interrupts.h
   physicalPath: ''
   security: NON_SECURE
   type: HEADER
-  userChecksum: 0518ECAFED8F14370A51F3D1EE7AAEE8
+  userChecksum: 4D24C4CE69F3994FB2FB8CD4A1F2C3ED
 - generatedChecksum: B96ADDA2C111E73B26EBA5E7B4498912
   logicalPath: packs/CMSIS/CMSIS/Core/Include
   name: mpu_armv7.h
@@ -468,13 +475,27 @@ files:
   security: NON_SECURE
   type: HEADER
   userChecksum: 6F9F9CBBFEDEC8784446F157BB625E1C
-- generatedChecksum: ECFF0E9EE11EE125D8A3B96216E5CF08
+- generatedChecksum: 7860396C42FE0E7FE8DE5EB25F68E7D5
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/systick
   name: plib_systick.h
   physicalPath: peripheral/systick
   security: NON_SECURE
   type: HEADER
-  userChecksum: ECFF0E9EE11EE125D8A3B96216E5CF08
+  userChecksum: 7860396C42FE0E7FE8DE5EB25F68E7D5
+- generatedChecksum: 81BFD57D170620FCDEA9BC052F1F7967
+  logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/tc
+  name: plib_tc3.h
+  physicalPath: peripheral/tc
+  security: NON_SECURE
+  type: HEADER
+  userChecksum: 81BFD57D170620FCDEA9BC052F1F7967
+- generatedChecksum: 6DBEAF7BD42014F5492374805406687A
+  logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/tc
+  name: plib_tc_common.h
+  physicalPath: peripheral/tc
+  security: NON_SECURE
+  type: HEADER
+  userChecksum: 6DBEAF7BD42014F5492374805406687A
 - generatedChecksum: 482E54FA91E3C975FBC8AEE336572A05
   logicalPath: packs/ATSAMD21G18A_DFP/component
   name: pm.h

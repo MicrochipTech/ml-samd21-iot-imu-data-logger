@@ -91,6 +91,18 @@ static void GCLK0_Initialize(void)
     }
 }
 
+
+static void GCLK1_Initialize(void)
+{
+    GCLK_REGS->GCLK_GENCTRL = GCLK_GENCTRL_SRC(7) | GCLK_GENCTRL_GENEN_Msk | GCLK_GENCTRL_ID(1);
+
+    GCLK_REGS->GCLK_GENDIV = GCLK_GENDIV_DIV(3) | GCLK_GENDIV_ID(1);
+    while((GCLK_REGS->GCLK_STATUS & GCLK_STATUS_SYNCBUSY_Msk) == GCLK_STATUS_SYNCBUSY_Msk)
+    {
+        /* wait for the Generator 1 synchronization */
+    }
+}
+
 void CLOCK_Initialize (void)
 {
     /* Function to Initialize the Oscillators */
@@ -98,6 +110,7 @@ void CLOCK_Initialize (void)
 
     DFLL_Initialize();
     GCLK0_Initialize();
+    GCLK1_Initialize();
 
 
     /* Selection of the Generator and write Lock for EIC */
@@ -106,12 +119,14 @@ void CLOCK_Initialize (void)
     GCLK_REGS->GCLK_CLKCTRL = GCLK_CLKCTRL_ID(20) | GCLK_CLKCTRL_GEN(0x0)  | GCLK_CLKCTRL_CLKEN_Msk;
     /* Selection of the Generator and write Lock for SERCOM5_CORE */
     GCLK_REGS->GCLK_CLKCTRL = GCLK_CLKCTRL_ID(25) | GCLK_CLKCTRL_GEN(0x0)  | GCLK_CLKCTRL_CLKEN_Msk;
+    /* Selection of the Generator and write Lock for TC3 TCC2 */
+    GCLK_REGS->GCLK_CLKCTRL = GCLK_CLKCTRL_ID(27) | GCLK_CLKCTRL_GEN(0x1)  | GCLK_CLKCTRL_CLKEN_Msk;
 
     /* Configure the APBA Bridge Clocks */
     PM_REGS->PM_APBAMASK = 0x5f;
 
     /* Configure the APBC Bridge Clocks */
-    PM_REGS->PM_APBCMASK = 0x10084;
+    PM_REGS->PM_APBCMASK = 0x10884;
 
 
     /*Disable RC oscillator*/

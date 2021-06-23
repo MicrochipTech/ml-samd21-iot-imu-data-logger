@@ -30,8 +30,6 @@
 #include "sensor.h"
 #include "app_config.h"
 
-#define SYSTICK_FREQ_IN_MHZ 48 // !NB! This must be changed if the processor clock changes
-
 // *****************************************************************************
 // *****************************************************************************
 // Section: Main Entry Point
@@ -39,14 +37,16 @@
 // *****************************************************************************
 
 static volatile uint32_t tickcounter = 0;
+static volatile uint32_t tickrate = 0;
 
 static struct sensor_device_t sensor;
 static struct sensor_buffer_t snsr_buffer;
 
-void SYSTICK_Callback(uintptr_t context) {
+void Ticker_Callback(TC_TIMER_STATUS status, uintptr_t context) {
     static int mstick = 0;
-    int tickrate = *((int *) context);
-    
+    (void) status;
+    (void) context;
+
     ++tickcounter;
     if (tickrate == 0) {
         mstick = 0;
@@ -62,21 +62,17 @@ uint64_t read_timer_ms(void) {
 }
 
 uint64_t read_timer_us(void) {
-    return tickcounter * 1000 + SYSTICK_TimerCounterGet() / SYSTICK_FREQ_IN_MHZ;
+    return tickcounter * 1000U + (uint32_t) TC3_Timer16bitCounterGet();
 }
 
 void sleep_ms(uint32_t ms) {
-    SYSTICK_TimerStop();
-    tickcounter = 0;
-    SYSTICK_TimerStart();
-    while (read_timer_ms() < ms) {};
+    uint32_t t0 = read_timer_ms();
+    while ((read_timer_ms() - t0) < ms) { };
 }
 
 void sleep_us(uint32_t us) {
-    SYSTICK_TimerStop();
-    tickcounter = 0;
-    SYSTICK_TimerStart();
-    while (read_timer_us() < us) {};
+    uint32_t t0 = read_timer_us();
+    while ((read_timer_us() - t0) < us) { };
 }
 
 
@@ -94,14 +90,12 @@ void SNSR_ISR_HANDLER(uintptr_t context) {
 
 int main ( void )
 {
-    int tickrate = 0;
-    
     /* Initialize all modules */
     SYS_Initialize ( NULL );
     
     /* Register and start the LED ticker */
-    SYSTICK_TimerCallbackSet(SYSTICK_Callback, (uintptr_t) &tickrate);
-    SYSTICK_TimerStart();
+    TC3_TimerCallbackRegister(Ticker_Callback, (uintptr_t) NULL);
+    TC3_TimerStart();
     
     /* Activate External Interrupt Controller for sensor capture */
     EIC_CallbackRegister(MIKRO_EIC_PIN, SNSR_ISR_HANDLER, (uintptr_t) &sensor);

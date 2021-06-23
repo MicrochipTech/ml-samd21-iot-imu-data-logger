@@ -62,6 +62,7 @@ void HardFault_Handler (void);
 void SysTick_Handler (void);
 void EIC_InterruptHandler (void);
 void SERCOM5_USART_InterruptHandler (void);
+void TC3_TimerInterruptHandler (void);
 
 
 

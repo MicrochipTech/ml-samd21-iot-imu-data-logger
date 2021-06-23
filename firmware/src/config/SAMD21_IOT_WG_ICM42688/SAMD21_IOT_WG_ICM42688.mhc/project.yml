@@ -6,20 +6,20 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: E45D1648EFC10229D7BE94DB19221FF7
-- generatedChecksum: 9BF54A1F77E4B47D237D7ECC63C46116
+- generatedChecksum: F79902C0C62AB2895280886875E1DD64
   logicalPath: config/SAMD21_IOT_WG_ICM42688
   name: initialization.c
   physicalPath: ''
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 9BF54A1F77E4B47D237D7ECC63C46116
-- generatedChecksum: 97A0D46621083EB835FEFCE4DEA48FC3
+  userChecksum: F79902C0C62AB2895280886875E1DD64
+- generatedChecksum: 4F84859F3960B16EBB33873E01302C16
   logicalPath: config/SAMD21_IOT_WG_ICM42688
   name: interrupts.c
   physicalPath: ''
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 97A0D46621083EB835FEFCE4DEA48FC3
+  userChecksum: 4F84859F3960B16EBB33873E01302C16
 - generatedChecksum: 6513F2461B8F476B68CA73906086047F
   logicalPath: config/SAMD21_IOT_WG_ICM42688
   name: libc_syscalls.c
@@ -27,13 +27,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: 6513F2461B8F476B68CA73906086047F
-- generatedChecksum: 0D405015BA4ACD8D62C21834C53344AB
+- generatedChecksum: 2B8248D103AD998D812677303133E012
   logicalPath: config/SAMD21_IOT_WG_ICM42688/peripheral/clock
   name: plib_clock.c
   physicalPath: peripheral/clock
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 0D405015BA4ACD8D62C21834C53344AB
+  userChecksum: 2B8248D103AD998D812677303133E012
 - generatedChecksum: 5CC7C35C3939F3032CE5E7F0987B5703
   logicalPath: config/SAMD21_IOT_WG_ICM42688/peripheral/eic
   name: plib_eic.c
@@ -48,13 +48,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: C3ECDED3D6301DB0DE622293ED615D21
-- generatedChecksum: 62E04008312979BCB0AEFB2D074C4716
+- generatedChecksum: 3805FECCE0EA66CA583DD0173628E7ED
   logicalPath: config/SAMD21_IOT_WG_ICM42688/peripheral/nvic
   name: plib_nvic.c
   physicalPath: peripheral/nvic
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 62E04008312979BCB0AEFB2D074C4716
+  userChecksum: 3805FECCE0EA66CA583DD0173628E7ED
 - generatedChecksum: E85A8757F82A322C86C52D9BF238E9E1
   logicalPath: config/SAMD21_IOT_WG_ICM42688/peripheral/nvmctrl
   name: plib_nvmctrl.c
@@ -90,6 +90,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: 901668A7AECAE8B7188421F4A84AD20C
+- generatedChecksum: F0C365066536FA8581549DF457A2164A
+  logicalPath: config/SAMD21_IOT_WG_ICM42688/peripheral/tc
+  name: plib_tc3.c
+  physicalPath: peripheral/tc
+  security: NON_SECURE
+  type: SOURCE
+  userChecksum: F0C365066536FA8581549DF457A2164A
 - generatedChecksum: 2645E564BD945DAED1424FD8D7B39330
   logicalPath: config/SAMD21_IOT_WG_ICM42688
   name: startup_xc32.c
@@ -209,13 +216,13 @@ files:
   security: NON_SECURE
   type: HEADER
   userChecksum: 2AD9700A41DC94A60C663A17CEDB2703
-- generatedChecksum: 55EC1582A80937C80016F3B5175342B2
+- generatedChecksum: A2C0BBE2F02A6015802D35BA004A3FAC
   logicalPath: config/SAMD21_IOT_WG_ICM42688
   name: definitions.h
   physicalPath: ''
   security: NON_SECURE
   type: HEADER
-  userChecksum: 55EC1582A80937C80016F3B5175342B2
+  userChecksum: A2C0BBE2F02A6015802D35BA004A3FAC
 - generatedChecksum: 7200FE37B300952D70C11DFE5DA3D6B7
   logicalPath: config/SAMD21_IOT_WG_ICM42688
   name: device.h
@@ -328,13 +335,13 @@ files:
   security: NON_SECURE
   type: HEADER
   userChecksum: 4017D6C4D2082CB4A87FEFE5411B6559
-- generatedChecksum: 49602FCF34D20CE86F076C713195F1FF
+- generatedChecksum: 68CA5F2BC2C51FBA50FFE99BAA8FF493
   logicalPath: config/SAMD21_IOT_WG_ICM42688
   name: interrupts.h
   physicalPath: ''
   security: NON_SECURE
   type: HEADER
-  userChecksum: 49602FCF34D20CE86F076C713195F1FF
+  userChecksum: 68CA5F2BC2C51FBA50FFE99BAA8FF493
 - generatedChecksum: B96ADDA2C111E73B26EBA5E7B4498912
   logicalPath: packs/CMSIS/CMSIS/Core/Include
   name: mpu_armv7.h
@@ -475,6 +482,20 @@ files:
   security: NON_SECURE
   type: HEADER
   userChecksum: ECFF0E9EE11EE125D8A3B96216E5CF08
+- generatedChecksum: 81BFD57D170620FCDEA9BC052F1F7967
+  logicalPath: config/SAMD21_IOT_WG_ICM42688/peripheral/tc
+  name: plib_tc3.h
+  physicalPath: peripheral/tc
+  security: NON_SECURE
+  type: HEADER
+  userChecksum: 81BFD57D170620FCDEA9BC052F1F7967
+- generatedChecksum: 6DBEAF7BD42014F5492374805406687A
+  logicalPath: config/SAMD21_IOT_WG_ICM42688/peripheral/tc
+  name: plib_tc_common.h
+  physicalPath: peripheral/tc
+  security: NON_SECURE
+  type: HEADER
+  userChecksum: 6DBEAF7BD42014F5492374805406687A
 - generatedChecksum: 482E54FA91E3C975FBC8AEE336572A05
   logicalPath: packs/ATSAMD21G18A_DFP/component
   name: pm.h

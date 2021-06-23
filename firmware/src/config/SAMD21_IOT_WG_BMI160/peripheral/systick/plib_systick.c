@@ -42,17 +42,13 @@
 #include "interrupts.h"
 #include "plib_systick.h"
 
-static SYSTICK_OBJECT systick;
 
 void SYSTICK_TimerInitialize ( void )
 {
     SysTick->CTRL = 0U;
     SysTick->VAL = 0U;
     SysTick->LOAD = 0xBB80U - 1U;
-    SysTick->CTRL = SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_CLKSOURCE_Msk;
-
-    systick.tickCounter = 0U;
-    systick.callback = NULL;
+    SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk;
 }
 
 void SYSTICK_TimerRestart ( void )
@@ -94,38 +90,8 @@ uint32_t SYSTICK_TimerFrequencyGet ( void )
 }
 
 
-
-void SYSTICK_DelayMs ( uint32_t delay_ms)
+bool SYSTICK_TimerPeriodHasExpired(void)
 {
-	uint32_t tickStart = 0U;
-	uint32_t delayTicks = 0U;
-	const uint32_t sysCtrlMasks = (SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk);
-
-	if((SysTick->CTRL & sysCtrlMasks) == sysCtrlMasks)
-	{
-		tickStart=systick.tickCounter;
-       /* Number of tick interrupts for a given delay (in ms) */
-		delayTicks=(1000U * delay_ms)/SYSTICK_INTERRUPT_PERIOD_IN_US;  
-		while((systick.tickCounter-tickStart) < delayTicks)
-		{
-		}
-	}
+   return ((SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) > 0U);
 }
 
-void SYSTICK_TimerCallbackSet ( SYSTICK_CALLBACK callback, uintptr_t context )
-{
-   systick.callback = callback;
-   systick.context = context;
-}
-
-void SysTick_Handler(void)
-{
-   /* Reading control register clears the count flag */
-   uint32_t sysCtrl = SysTick->CTRL;
-   systick.tickCounter++;
-   if(systick.callback != NULL)
-   {
-       systick.callback(systick.context);
-   }
-   (void)sysCtrl;
-}
