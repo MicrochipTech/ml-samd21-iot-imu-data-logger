@@ -36,17 +36,33 @@
 
 // *****************************************************************************
 // *****************************************************************************
+// Section: Enumeration of available data streaming formats
+// *****************************************************************************
+// *****************************************************************************
+#define DATA_STREAMER_FORMAT_UNKNOWN    0
+
+// Dump data to uart in ascii format
+#define DATA_STREAMER_FORMAT_ASCII      1
+
+// Dump data to uart in form suitable for MPLAB DV plugin
+#define DATA_STREAMER_FORMAT_MDV        2
+
+// Dump data to uart in form suitable for SensiMLs Data Capture Lab (simple stream format)
+#define DATA_STREAMER_FORMAT_SMLSS      3
+
+// Disable all data streaming
+#define DATA_STREAMER_FORMAT_NONE       4
+
+// *****************************************************************************
+// *****************************************************************************
 // Section: User configurable application level parameters
 // *****************************************************************************
 // *****************************************************************************
 
-// Set to true to have firmware dump data to uart in ascii format
-#define DATA_LOGGER_BUILD       true
-
-// Set to true to have firmware dump data to uart in form suitable for MPLAB DV plugin
-#define DATA_VISUALIZER_BUILD   false
-
-#define MPDV_START_OF_FRAME     0xA5U   // Frame header byte for MPLAB DV
+// Data streaming formatting selection
+#ifndef DATA_STREAMER_FORMAT
+#define DATA_STREAMER_FORMAT    DATA_STREAMER_FORMAT_ASCII
+#endif
 
 // IMU sampling rate in units of SNSR_SAMPLE_RATE_UNIT
 // For BMI160:
@@ -69,11 +85,6 @@
 // Gyro range in DPS
 #define SNSR_GYRO_RANGE         2000
 
-#define SNSR_BUF_LEN            64
-
-// stream sensor data type natively
-#define SNSR_DATA_TYPE          int16_t
-
 // Define which axes from the IMU to use
 #define SNSR_USE_ACCEL_X        true
 #define SNSR_USE_ACCEL_Y        true
@@ -81,6 +92,20 @@
 #define SNSR_USE_GYRO_X         true
 #define SNSR_USE_GYRO_Y         true
 #define SNSR_USE_GYRO_Z         true
+
+// Size of sensor buffer in samples
+#define SNSR_BUF_LEN            64
+
+// Type used to store and stream sensor samples
+#define SNSR_DATA_TYPE          int16_t
+
+// Frame header byte for MPLAB DV
+#define MDV_START_OF_FRAME     0xA5U
+
+// SensiML specific parameters
+#if (DATA_STREAMER_FORMAT == DATA_STREAMER_FORMAT_SMLSS)
+#define SNSR_SAMPLES_PER_PACKET 6
+#endif
 
 // LED tick rate parameters
 #define TICK_RATE_FAST          100
@@ -103,10 +128,8 @@
     #define MULTI_SENSOR 0
 #endif
 
-#if (DATA_LOGGER_BUILD && DATA_VISUALIZER_BUILD)
-    #error "Only one of DATA_LOGGER_BUILD or DATA_VISUALIZER_BUILD may be set"
-#elif !(DATA_LOGGER_BUILD || DATA_VISUALIZER_BUILD)
-    #error "Neither one of DATA_LOGGER_BUILD or DATA_VISUALIZER_BUILD has been set"
+#if !defined(DATA_STREAMER_FORMAT) || (DATA_STREAMER_FORMAT == DATA_STREAMER_FORMAT_UNKNOWN)
+    #error "No DATA_STREAMER_FORMAT type has been set"
 #endif
 
 // Provide the functions needed by sensor module
@@ -127,12 +150,7 @@
 #define LED_ALL_On()    do { LED_YELLOW_On(); LED_GREEN_On(); LED_RED_On(); LED_BLUE_On(); } while (0)
 #define LED_ALL_Off()   do { LED_YELLOW_Off(); LED_GREEN_Off(); LED_RED_Off(); LED_BLUE_Off(); } while (0)
 
-// Macros for portability
-#define TC_TimerCallbackRegister(cb) TC3_TimerCallbackRegister(cb, (uintptr_t) NULL)
-#define MIKRO_INT_CallbackRegister(cb) EIC_CallbackRegister(EIC_PIN_12, cb, (uintptr_t) NULL)
-#define TC_TimerStart TC3_TimerStart
-#define TC_TimerGet TC3_Timer16bitCounterGet
-#define TC_TimerCallbackRegister(cb) TC3_TimerCallbackRegister(cb, (uintptr_t) NULL)
+#define STREAM_FORMAT_IS(X) (defined(DATA_STREAMER_FORMAT_ ## X) && (DATA_STREAMER_FORMAT_ ## X == DATA_STREAMER_FORMAT))
 
 #define SNSR_SAMPLE_RATE_UNIT_STR ((SNSR_SAMPLE_RATE_UNIT == SNSR_SAMPLE_RATE_UNIT_KHZ) ? "kHz" : "Hz")
 #ifdef SNSR_TYPE_BMI160
@@ -140,6 +158,13 @@
 #elif SNSR_TYPE_ICM42688
 #define SNSR_NAME "icm42688"
 #endif
+
+// Macros for portability
+#define TC_TimerCallbackRegister(cb) TC3_TimerCallbackRegister(cb, (uintptr_t) NULL)
+#define MIKRO_INT_CallbackRegister(cb) EIC_CallbackRegister(EIC_PIN_12, cb, (uintptr_t) NULL)
+#define TC_TimerStart TC3_TimerStart
+#define TC_TimerGet TC3_Timer16bitCounterGet
+#define TC_TimerCallbackRegister(cb) TC3_TimerCallbackRegister(cb, (uintptr_t) NULL)
 
 #ifdef	__cplusplus
 extern "C" {
