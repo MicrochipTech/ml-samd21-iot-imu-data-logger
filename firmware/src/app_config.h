@@ -31,6 +31,9 @@
 #ifndef APP_CONFIG_H
 #define	APP_CONFIG_H
 
+#include <stdint.h>
+#include <stdbool.h>
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: User configurable application level parameters
@@ -83,9 +86,6 @@
 #define TICK_RATE_FAST          100
 #define TICK_RATE_SLOW          500
 
-// Switch debounce time (default value based on 48MHz clock rate)
-#define SW_DEBOUNCE_INTERVAL   730000L
-
 // *****************************************************************************
 // *****************************************************************************
 // Section: Defines derived from user config parameters
@@ -126,7 +126,13 @@
 #define LED_YELLOW_Off  LED_YELLOW_Set
 #define LED_ALL_On()    do { LED_YELLOW_On(); LED_GREEN_On(); LED_RED_On(); LED_BLUE_On(); } while (0)
 #define LED_ALL_Off()   do { LED_YELLOW_Off(); LED_GREEN_Off(); LED_RED_Off(); LED_BLUE_Off(); } while (0)
-#define MIKRO_EIC_PIN   EIC_PIN_12
+
+// Macros for portability
+#define TC_TimerCallbackRegister(cb) TC3_TimerCallbackRegister(cb, (uintptr_t) NULL)
+#define MIKRO_INT_CallbackRegister(cb) EIC_CallbackRegister(EIC_PIN_12, cb, (uintptr_t) NULL)
+#define TC_TimerStart TC3_TimerStart
+#define TC_TimerGet TC3_Timer16bitCounterGet
+#define TC_TimerCallbackRegister(cb) TC3_TimerCallbackRegister(cb, (uintptr_t) NULL)
 
 #define SNSR_SAMPLE_RATE_UNIT_STR ((SNSR_SAMPLE_RATE_UNIT == SNSR_SAMPLE_RATE_UNIT_KHZ) ? "kHz" : "Hz")
 #ifdef SNSR_TYPE_BMI160

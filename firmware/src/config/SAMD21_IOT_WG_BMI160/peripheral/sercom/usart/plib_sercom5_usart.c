@@ -61,7 +61,7 @@
 /* SERCOM5 USART baud value for 115200 Hz baud rate */
 #define SERCOM5_USART_INT_BAUD_VALUE            (63019UL)
 
-static SERCOM_USART_OBJECT sercom5USARTObj;
+static SERCOM_USART_RING_BUFFER_OBJECT sercom5USARTObj;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -69,28 +69,19 @@ static SERCOM_USART_OBJECT sercom5USARTObj;
 // *****************************************************************************
 // *****************************************************************************
 
-void static SERCOM5_USART_ErrorClear( void )
-{
-    uint8_t  u8dummyData = 0U;
-    USART_ERROR errorStatus = (USART_ERROR) (SERCOM5_REGS->USART_INT.SERCOM_STATUS & (uint16_t)(SERCOM_USART_INT_STATUS_PERR_Msk | SERCOM_USART_INT_STATUS_FERR_Msk | SERCOM_USART_INT_STATUS_BUFOVF_Msk ));
+#define SERCOM5_USART_READ_BUFFER_SIZE      128
+#define SERCOM5_USART_READ_BUFFER_9BIT_SIZE     (128 >> 1)
+#define SERCOM5_USART_RX_INT_DISABLE()      SERCOM5_REGS->USART_INT.SERCOM_INTENCLR = SERCOM_USART_INT_INTENCLR_RXC_Msk
+#define SERCOM5_USART_RX_INT_ENABLE()       SERCOM5_REGS->USART_INT.SERCOM_INTENSET = SERCOM_USART_INT_INTENSET_RXC_Msk
 
-    if(errorStatus != USART_ERROR_NONE)
-    {
-        /* Clear error flag */
-        SERCOM5_REGS->USART_INT.SERCOM_INTFLAG = (uint8_t)SERCOM_USART_INT_INTFLAG_ERROR_Msk;
-        /* Clear all errors */
-        SERCOM5_REGS->USART_INT.SERCOM_STATUS = (uint16_t)(SERCOM_USART_INT_STATUS_PERR_Msk | SERCOM_USART_INT_STATUS_FERR_Msk | SERCOM_USART_INT_STATUS_BUFOVF_Msk);
+static uint8_t SERCOM5_USART_ReadBuffer[SERCOM5_USART_READ_BUFFER_SIZE];
 
-        /* Flush existing error bytes from the RX FIFO */
-        while((SERCOM5_REGS->USART_INT.SERCOM_INTFLAG & (uint8_t)SERCOM_USART_INT_INTFLAG_RXC_Msk) == (uint8_t)SERCOM_USART_INT_INTFLAG_RXC_Msk)
-        {
-            u8dummyData = (uint8_t)SERCOM5_REGS->USART_INT.SERCOM_DATA;
-        }
-    }
+#define SERCOM5_USART_WRITE_BUFFER_SIZE     128
+#define SERCOM5_USART_WRITE_BUFFER_9BIT_SIZE  (128 >> 1)
+#define SERCOM5_USART_TX_INT_DISABLE()      SERCOM5_REGS->USART_INT.SERCOM_INTENCLR = SERCOM_USART_INT_INTENCLR_DRE_Msk
+#define SERCOM5_USART_TX_INT_ENABLE()       SERCOM5_REGS->USART_INT.SERCOM_INTENSET = SERCOM_USART_INT_INTENSET_DRE_Msk
 
-    /* Ignore the warning */
-    (void)u8dummyData;
-}
+static uint8_t SERCOM5_USART_WriteBuffer[SERCOM5_USART_WRITE_BUFFER_SIZE];
 
 void SERCOM5_USART_Initialize( void )
 {
@@ -133,17 +124,34 @@ void SERCOM5_USART_Initialize( void )
     }
 
     /* Initialize instance object */
-    sercom5USARTObj.rxBuffer = NULL;
-    sercom5USARTObj.rxSize = 0;
-    sercom5USARTObj.rxProcessedSize = 0;
-    sercom5USARTObj.rxBusyStatus = false;
-    sercom5USARTObj.rxCallback = NULL;
-    sercom5USARTObj.txBuffer = NULL;
-    sercom5USARTObj.txSize = 0;
-    sercom5USARTObj.txProcessedSize = 0;
-    sercom5USARTObj.txBusyStatus = false;
-    sercom5USARTObj.txCallback = NULL;
+    sercom5USARTObj.rdCallback = NULL;
+    sercom5USARTObj.rdInIndex = 0U;
+    sercom5USARTObj.rdOutIndex = 0U;
+    sercom5USARTObj.isRdNotificationEnabled = false;
+    sercom5USARTObj.isRdNotifyPersistently = false;
+    sercom5USARTObj.rdThreshold = 0U;
     sercom5USARTObj.errorStatus = USART_ERROR_NONE;
+    sercom5USARTObj.wrCallback = NULL;
+    sercom5USARTObj.wrInIndex = 0U;
+    sercom5USARTObj.wrOutIndex = 0U;
+    sercom5USARTObj.isWrNotificationEnabled = false;
+    sercom5USARTObj.isWrNotifyPersistently = false;
+    sercom5USARTObj.wrThreshold = 0U;
+    if (((SERCOM5_REGS->USART_INT.SERCOM_CTRLB & SERCOM_USART_INT_CTRLB_CHSIZE_Msk) >> SERCOM_USART_INT_CTRLB_CHSIZE_Pos) != 0x01U)
+    {
+        sercom5USARTObj.rdBufferSize = SERCOM5_USART_READ_BUFFER_SIZE;
+        sercom5USARTObj.wrBufferSize = SERCOM5_USART_WRITE_BUFFER_SIZE;
+    }
+    else
+    {
+        sercom5USARTObj.rdBufferSize = SERCOM5_USART_READ_BUFFER_9BIT_SIZE;
+        sercom5USARTObj.wrBufferSize = SERCOM5_USART_WRITE_BUFFER_9BIT_SIZE;
+    }
+    /* Enable error interrupt */
+    SERCOM5_REGS->USART_INT.SERCOM_INTENSET = (uint8_t)SERCOM_USART_INT_INTENSET_ERROR_Msk;
+
+    /* Enable Receive Complete interrupt */
+    SERCOM5_REGS->USART_INT.SERCOM_INTENSET = (uint8_t)SERCOM_USART_INT_INTENSET_RXC_Msk;
 }
 
 uint32_t SERCOM5_USART_FrequencyGet( void )
@@ -156,14 +164,6 @@ bool SERCOM5_USART_SerialSetup( USART_SERIAL_SETUP * serialSetup, uint32_t clkFr
     bool setupStatus       = false;
     uint32_t baudValue     = 0U;
     uint32_t sampleRate    = 0U;
-
-    bool transferProgress = sercom5USARTObj.txBusyStatus;
-    transferProgress = sercom5USARTObj.rxBusyStatus || transferProgress; 
-    if(transferProgress)
-    {
-        /* Transaction is in progress, so return without updating settings */
-        return setupStatus;
-    }
 
     if((serialSetup != NULL) && (serialSetup->baudRate != 0U))
     {
@@ -233,11 +233,43 @@ bool SERCOM5_USART_SerialSetup( USART_SERIAL_SETUP * serialSetup, uint32_t clkFr
                 /* Do nothing */
             }
 
+
+            if (((SERCOM5_REGS->USART_INT.SERCOM_CTRLB & SERCOM_USART_INT_CTRLB_CHSIZE_Msk) >> SERCOM_USART_INT_CTRLB_CHSIZE_Pos) != 0x01U)
+            {
+                sercom5USARTObj.rdBufferSize = SERCOM5_USART_READ_BUFFER_SIZE;
+                sercom5USARTObj.wrBufferSize = SERCOM5_USART_WRITE_BUFFER_SIZE;
+            }
+            else
+            {
+                sercom5USARTObj.rdBufferSize = SERCOM5_USART_READ_BUFFER_9BIT_SIZE;
+                sercom5USARTObj.wrBufferSize = SERCOM5_USART_WRITE_BUFFER_9BIT_SIZE;
+            }
+
             setupStatus = true;
         }
     }
 
     return setupStatus;
+}
+
+void static SERCOM5_USART_ErrorClear( void )
+{
+    uint8_t  u8dummyData = 0;
+
+    /* Clear error flag */
+    SERCOM5_REGS->USART_INT.SERCOM_INTFLAG = SERCOM_USART_INT_INTFLAG_ERROR_Msk;
+
+    /* Clear all errors */
+    SERCOM5_REGS->USART_INT.SERCOM_STATUS = SERCOM_USART_INT_STATUS_PERR_Msk | SERCOM_USART_INT_STATUS_FERR_Msk | SERCOM_USART_INT_STATUS_BUFOVF_Msk ;
+
+    /* Flush existing error bytes from the RX FIFO */
+    while((SERCOM5_REGS->USART_INT.SERCOM_INTFLAG & SERCOM_USART_INT_INTFLAG_RXC_Msk) == SERCOM_USART_INT_INTFLAG_RXC_Msk)
+    {
+        u8dummyData = SERCOM5_REGS->USART_INT.SERCOM_DATA;
+    }
+
+    /* Ignore the warning */
+    (void)u8dummyData;
 }
 
 USART_ERROR SERCOM5_USART_ErrorGet( void )
@@ -250,270 +282,457 @@ USART_ERROR SERCOM5_USART_ErrorGet( void )
 }
 
 
-void SERCOM5_USART_TransmitterEnable( void )
+/* This routine is only called from ISR. Hence do not disable/enable USART interrupts. */
+static inline bool SERCOM5_USART_RxPushByte(uint16_t rdByte)
 {
-    SERCOM5_REGS->USART_INT.SERCOM_CTRLB |= SERCOM_USART_INT_CTRLB_TXEN_Msk;
+    uint32_t tempInIndex;
+    bool isSuccess = false;
 
-    /* Wait for sync */
-    while((SERCOM5_REGS->USART_INT.SERCOM_SYNCBUSY) != 0U)
+    tempInIndex = sercom5USARTObj.rdInIndex + 1U;
+
+    if (tempInIndex >= sercom5USARTObj.rdBufferSize)
     {
-        /* Do nothing */
+        tempInIndex = 0U;
     }
-}
 
-void SERCOM5_USART_TransmitterDisable( void )
-{
-    SERCOM5_REGS->USART_INT.SERCOM_CTRLB &= ~SERCOM_USART_INT_CTRLB_TXEN_Msk;
-
-    /* Wait for sync */
-    while((SERCOM5_REGS->USART_INT.SERCOM_SYNCBUSY) != 0U)
+    if (tempInIndex == sercom5USARTObj.rdOutIndex)
     {
-        /* Do nothing */
-    }
-}
-
-bool SERCOM5_USART_Write( void *buffer, const size_t size )
-{
-    bool writeStatus      = false;
-    uint8_t *pu8Data      = (uint8_t*)buffer;
-    uint32_t processedSize = 0U;
-
-    if(pu8Data != NULL)
-    {
-        if(sercom5USARTObj.txBusyStatus == false)
+        /* Queue is full - Report it to the application. Application gets a chance to free up space by reading data out from the RX ring buffer */
+        if(sercom5USARTObj.rdCallback != NULL)
         {
-            sercom5USARTObj.txBuffer = pu8Data;
-            sercom5USARTObj.txSize = size;
-            sercom5USARTObj.txBusyStatus = true;
+            sercom5USARTObj.rdCallback(SERCOM_USART_EVENT_READ_BUFFER_FULL, sercom5USARTObj.rdContext);
 
-            /* Initiate the transfer by sending first byte */
-            while (((SERCOM5_REGS->USART_INT.SERCOM_INTFLAG & SERCOM_USART_INT_INTFLAG_DRE_Msk) == SERCOM_USART_INT_INTFLAG_DRE_Msk) &&
-                    (processedSize < sercom5USARTObj.txSize))
+            /* Read the indices again in case application has freed up space in RX ring buffer */
+            tempInIndex = sercom5USARTObj.rdInIndex + 1U;
+
+            if (tempInIndex >= sercom5USARTObj.rdBufferSize)
             {
-                if (((SERCOM5_REGS->USART_INT.SERCOM_CTRLB & SERCOM_USART_INT_CTRLB_CHSIZE_Msk) >> SERCOM_USART_INT_CTRLB_CHSIZE_Pos) != 0x01U)
+                tempInIndex = 0U;
+            }
+        }
+    }
+
+    /* Attempt to push the data into the ring buffer */
+    if (tempInIndex != sercom5USARTObj.rdOutIndex)
+    {
+        if (((SERCOM5_REGS->USART_INT.SERCOM_CTRLB & SERCOM_USART_INT_CTRLB_CHSIZE_Msk) >> SERCOM_USART_INT_CTRLB_CHSIZE_Pos) != 0x01U)
+        {
+            /* 8-bit */
+            SERCOM5_USART_ReadBuffer[sercom5USARTObj.rdInIndex] = (uint8_t)rdByte;
+        }
+        else
+        {
+            /* 9-bit */
+            ((uint16_t*)&SERCOM5_USART_ReadBuffer)[sercom5USARTObj.rdInIndex] = rdByte;
+        }
+
+        sercom5USARTObj.rdInIndex = tempInIndex;
+        isSuccess = true;
+    }
+    else
+    {
+        /* Queue is full. Data will be lost. */
+    }
+
+    return isSuccess;
+}
+
+/* This routine is only called from ISR. Hence do not disable/enable USART interrupts. */
+static void SERCOM5_USART_ReadNotificationSend(void)
+{
+    uint32_t nUnreadBytesAvailable;
+
+    if (sercom5USARTObj.isRdNotificationEnabled == true)
+    {
+        nUnreadBytesAvailable = SERCOM5_USART_ReadCountGet();
+
+        if(sercom5USARTObj.rdCallback != NULL)
+        {
+            if (sercom5USARTObj.isRdNotifyPersistently == true)
+            {
+                if (nUnreadBytesAvailable >= sercom5USARTObj.rdThreshold)
                 {
-                    /* 8-bit mode */
-                    SERCOM5_REGS->USART_INT.SERCOM_DATA = sercom5USARTObj.txBuffer[processedSize++];
-                }
-                else
-                {
-                    /* 9-bit mode */
-                    SERCOM5_REGS->USART_INT.SERCOM_DATA = ((uint16_t*)sercom5USARTObj.txBuffer)[processedSize++];
+                    sercom5USARTObj.rdCallback(SERCOM_USART_EVENT_READ_THRESHOLD_REACHED, sercom5USARTObj.rdContext);
                 }
             }
-            sercom5USARTObj.txProcessedSize = processedSize;
-            SERCOM5_REGS->USART_INT.SERCOM_INTENSET = (uint8_t)SERCOM_USART_INT_INTFLAG_DRE_Msk;
-
-            writeStatus = true;
+            else
+            {
+                if (nUnreadBytesAvailable == sercom5USARTObj.rdThreshold)
+                {
+                    sercom5USARTObj.rdCallback(SERCOM_USART_EVENT_READ_THRESHOLD_REACHED, sercom5USARTObj.rdContext);
+                }
+            }
         }
     }
-
-    return writeStatus;
 }
 
-
-bool SERCOM5_USART_WriteIsBusy( void )
+size_t SERCOM5_USART_Read(uint8_t* pRdBuffer, const size_t size)
 {
-    return sercom5USARTObj.txBusyStatus;
-}
+    size_t nBytesRead = 0U;
+    uint32_t rdOutIndex;
+    uint32_t rdInIndex;
 
-size_t SERCOM5_USART_WriteCountGet( void )
-{
-    return sercom5USARTObj.txProcessedSize;
-}
+    /* Take a snapshot of indices to avoid creation of critical section */
 
-void SERCOM5_USART_WriteCallbackRegister( SERCOM_USART_CALLBACK callback, uintptr_t context )
-{
-    sercom5USARTObj.txCallback = callback;
+    rdOutIndex = sercom5USARTObj.rdOutIndex;
+    rdInIndex = sercom5USARTObj.rdInIndex;
 
-    sercom5USARTObj.txContext = context;
-}
-
-
-void SERCOM5_USART_ReceiverEnable( void )
-{
-    SERCOM5_REGS->USART_INT.SERCOM_CTRLB |= SERCOM_USART_INT_CTRLB_RXEN_Msk;
-
-    /* Wait for sync */
-    while((SERCOM5_REGS->USART_INT.SERCOM_SYNCBUSY) != 0U)
+    while (nBytesRead < size)
     {
-        /* Do nothing */
-    }
-}
-
-void SERCOM5_USART_ReceiverDisable( void )
-{
-    SERCOM5_REGS->USART_INT.SERCOM_CTRLB &= ~SERCOM_USART_INT_CTRLB_RXEN_Msk;
-
-    /* Wait for sync */
-    while((SERCOM5_REGS->USART_INT.SERCOM_SYNCBUSY) != 0U)
-    {
-        /* Do nothing */
-    }
-}
-
-bool SERCOM5_USART_Read( void *buffer, const size_t size )
-{
-    bool readStatus        = false;
-    uint8_t* pu8Data       = (uint8_t*)buffer;
-
-    if(pu8Data != NULL)
-    {
-        if(sercom5USARTObj.rxBusyStatus == false)
+        if (rdOutIndex != rdInIndex)
         {
-            /* Clear error flags and flush out error data that may have been received when no active request was pending */
-            SERCOM5_USART_ErrorClear();
+            if (((SERCOM5_REGS->USART_INT.SERCOM_CTRLB & SERCOM_USART_INT_CTRLB_CHSIZE_Msk) >> SERCOM_USART_INT_CTRLB_CHSIZE_Pos) != 0x01U)
+            {
+                pRdBuffer[nBytesRead++] = SERCOM5_USART_ReadBuffer[rdOutIndex++];
+            }
+            else
+            {
+                ((uint16_t*)pRdBuffer)[nBytesRead++] = ((uint16_t*)&SERCOM5_USART_ReadBuffer)[rdOutIndex++];
+            }
 
-            sercom5USARTObj.rxBuffer = pu8Data;
-            sercom5USARTObj.rxSize = size;
-            sercom5USARTObj.rxProcessedSize = 0U;
-            sercom5USARTObj.rxBusyStatus = true;
-            sercom5USARTObj.errorStatus = USART_ERROR_NONE;
-
-            readStatus = true;
-
-            /* Enable receive and error interrupt */
-            SERCOM5_REGS->USART_INT.SERCOM_INTENSET = (uint8_t)(SERCOM_USART_INT_INTENSET_ERROR_Msk | SERCOM_USART_INT_INTENSET_RXC_Msk);
+            if (rdOutIndex >= sercom5USARTObj.rdBufferSize)
+            {
+                rdOutIndex = 0U;
+            }
+        }
+        else
+        {
+            /* No more data available in the RX buffer */
+            break;
         }
     }
 
-    return readStatus;
+    sercom5USARTObj.rdOutIndex = rdOutIndex;
+
+    return nBytesRead;
 }
 
-bool SERCOM5_USART_ReadIsBusy( void )
+size_t SERCOM5_USART_ReadCountGet(void)
 {
-    return sercom5USARTObj.rxBusyStatus;
-}
+    size_t nUnreadBytesAvailable;
+    uint32_t rdOutIndex;
+    uint32_t rdInIndex;
 
-size_t SERCOM5_USART_ReadCountGet( void )
-{
-    return sercom5USARTObj.rxProcessedSize;
-}
+    /* Take a snapshot of indices to avoid creation of critical section */
+    rdOutIndex = sercom5USARTObj.rdOutIndex;
+    rdInIndex = sercom5USARTObj.rdInIndex;
 
-bool SERCOM5_USART_ReadAbort(void)
-{
-    if (sercom5USARTObj.rxBusyStatus == true)
+    if ( rdInIndex >=  rdOutIndex)
     {
-        /* Disable receive and error interrupt */
-        SERCOM5_REGS->USART_INT.SERCOM_INTENCLR = (uint8_t)(SERCOM_USART_INT_INTENCLR_ERROR_Msk | SERCOM_USART_INT_INTENCLR_RXC_Msk);
-
-        sercom5USARTObj.rxBusyStatus = false;
-
-        /* If required application should read the num bytes processed prior to calling the read abort API */
-        sercom5USARTObj.rxSize = sercom5USARTObj.rxProcessedSize = 0U;
+        nUnreadBytesAvailable =  rdInIndex - rdOutIndex;
+    }
+    else
+    {
+        nUnreadBytesAvailable =  (sercom5USARTObj.rdBufferSize -  rdOutIndex) + rdInIndex;
     }
 
-    return true;
+    return nUnreadBytesAvailable;
 }
 
-void SERCOM5_USART_ReadCallbackRegister( SERCOM_USART_CALLBACK callback, uintptr_t context )
+size_t SERCOM5_USART_ReadFreeBufferCountGet(void)
 {
-    sercom5USARTObj.rxCallback = callback;
-
-    sercom5USARTObj.rxContext = context;
+    return (sercom5USARTObj.rdBufferSize - 1U) - SERCOM5_USART_ReadCountGet();
 }
+
+size_t SERCOM5_USART_ReadBufferSizeGet(void)
+{
+    return (sercom5USARTObj.rdBufferSize - 1U);
+}
+
+bool SERCOM5_USART_ReadNotificationEnable(bool isEnabled, bool isPersistent)
+{
+    bool previousStatus = sercom5USARTObj.isRdNotificationEnabled;
+
+    sercom5USARTObj.isRdNotificationEnabled = isEnabled;
+
+    sercom5USARTObj.isRdNotifyPersistently = isPersistent;
+
+    return previousStatus;
+}
+
+void SERCOM5_USART_ReadThresholdSet(uint32_t nBytesThreshold)
+{
+    if (nBytesThreshold > 0U)
+    {
+        sercom5USARTObj.rdThreshold = nBytesThreshold;
+    }
+}
+
+void SERCOM5_USART_ReadCallbackRegister( SERCOM_USART_RING_BUFFER_CALLBACK callback, uintptr_t context)
+{
+    sercom5USARTObj.rdCallback = callback;
+
+    sercom5USARTObj.rdContext = context;
+}
+
+
+/* This routine is only called from ISR. Hence do not disable/enable USART interrupts. */
+static bool SERCOM5_USART_TxPullByte(uint16_t* pWrByte)
+{
+    bool isSuccess = false;
+    uint32_t wrInIndex = sercom5USARTObj.wrInIndex;
+    uint32_t wrOutIndex = sercom5USARTObj.wrOutIndex;
+
+    if (wrOutIndex != wrInIndex)
+    {
+        if (((SERCOM5_REGS->USART_INT.SERCOM_CTRLB & SERCOM_USART_INT_CTRLB_CHSIZE_Msk) >> SERCOM_USART_INT_CTRLB_CHSIZE_Pos) != 0x01U)
+        {
+            *pWrByte = SERCOM5_USART_WriteBuffer[wrOutIndex++];
+        }
+        else
+        {
+            *pWrByte = ((uint16_t*)&SERCOM5_USART_WriteBuffer)[wrOutIndex++];
+        }
+
+
+        if (wrOutIndex >= sercom5USARTObj.wrBufferSize)
+        {
+            wrOutIndex = 0U;
+        }
+
+        sercom5USARTObj.wrOutIndex = wrOutIndex;
+
+        isSuccess = true;
+    }
+
+    return isSuccess;
+}
+
+static inline bool SERCOM5_USART_TxPushByte(uint16_t wrByte)
+{
+    uint32_t tempInIndex;
+    uint32_t wrInIndex = sercom5USARTObj.wrInIndex;
+    uint32_t wrOutIndex = sercom5USARTObj.wrOutIndex;
+
+    bool isSuccess = false;
+
+    tempInIndex = wrInIndex + 1U;
+
+    if (tempInIndex >= sercom5USARTObj.wrBufferSize)
+    {
+        tempInIndex = 0U;
+    }
+    if (tempInIndex != wrOutIndex)
+    {
+        if (((SERCOM5_REGS->USART_INT.SERCOM_CTRLB & SERCOM_USART_INT_CTRLB_CHSIZE_Msk) >> SERCOM_USART_INT_CTRLB_CHSIZE_Pos) != 0x01U)
+        {
+            SERCOM5_USART_WriteBuffer[wrInIndex] = (uint8_t)wrByte;
+        }
+        else
+        {
+            ((uint16_t*)&SERCOM5_USART_WriteBuffer)[wrInIndex] = wrByte;
+        }
+
+        sercom5USARTObj.wrInIndex = tempInIndex;
+
+        isSuccess = true;
+    }
+    else
+    {
+        /* Queue is full. Report Error. */
+    }
+
+    return isSuccess;
+}
+
+/* This routine is only called from ISR. Hence do not disable/enable USART interrupts. */
+static void SERCOM5_USART_WriteNotificationSend(void)
+{
+    uint32_t nFreeWrBufferCount;
+
+    if (sercom5USARTObj.isWrNotificationEnabled == true)
+    {
+        nFreeWrBufferCount = SERCOM5_USART_WriteFreeBufferCountGet();
+
+        if(sercom5USARTObj.wrCallback != NULL)
+        {
+            if (sercom5USARTObj.isWrNotifyPersistently == true)
+            {
+                if (nFreeWrBufferCount >= sercom5USARTObj.wrThreshold)
+                {
+                    sercom5USARTObj.wrCallback(SERCOM_USART_EVENT_WRITE_THRESHOLD_REACHED, sercom5USARTObj.wrContext);
+                }
+            }
+            else
+            {
+                if (nFreeWrBufferCount == sercom5USARTObj.wrThreshold)
+                {
+                    sercom5USARTObj.wrCallback(SERCOM_USART_EVENT_WRITE_THRESHOLD_REACHED, sercom5USARTObj.wrContext);
+                }
+            }
+        }
+    }
+}
+
+static size_t SERCOM5_USART_WritePendingBytesGet(void)
+{
+    size_t nPendingTxBytes;
+
+    /* Take a snapshot of indices to avoid creation of critical section */
+    uint32_t wrInIndex = sercom5USARTObj.wrInIndex;
+    uint32_t wrOutIndex = sercom5USARTObj.wrOutIndex;
+
+    if ( wrInIndex >= wrOutIndex)
+    {
+        nPendingTxBytes =  wrInIndex - wrOutIndex;
+    }
+    else
+    {
+        nPendingTxBytes =  (sercom5USARTObj.wrBufferSize -  wrOutIndex) + wrInIndex;
+    }
+
+    return nPendingTxBytes;
+}
+
+size_t SERCOM5_USART_WriteCountGet(void)
+{
+    size_t nPendingTxBytes;
+
+    nPendingTxBytes = SERCOM5_USART_WritePendingBytesGet();
+
+    return nPendingTxBytes;
+}
+
+size_t SERCOM5_USART_Write(uint8_t* pWrBuffer, const size_t size )
+{
+    size_t nBytesWritten  = 0U;
+
+    while (nBytesWritten < size)
+    {
+        if (((SERCOM5_REGS->USART_INT.SERCOM_CTRLB & SERCOM_USART_INT_CTRLB_CHSIZE_Msk) >> SERCOM_USART_INT_CTRLB_CHSIZE_Pos) != 0x01U)
+        {
+            if (SERCOM5_USART_TxPushByte(pWrBuffer[nBytesWritten]) == true)
+            {
+                nBytesWritten++;
+            }
+            else
+            {
+                /* Queue is full, exit the loop */
+                break;
+            }
+        }
+        else
+        {
+            if (SERCOM5_USART_TxPushByte(((uint16_t*)pWrBuffer)[nBytesWritten]) == true)
+            {
+                nBytesWritten++;
+            }
+            else
+            {
+                /* Queue is full, exit the loop */
+                break;
+            }
+        }
+    }
+
+    /* Check if any data is pending for transmission */
+    if (SERCOM5_USART_WritePendingBytesGet() > 0U)
+    {
+        /* Enable TX interrupt as data is pending for transmission */
+        SERCOM5_USART_TX_INT_ENABLE();
+    }
+
+    return nBytesWritten;
+}
+
+size_t SERCOM5_USART_WriteFreeBufferCountGet(void)
+{
+    return (sercom5USARTObj.wrBufferSize - 1U) - SERCOM5_USART_WriteCountGet();
+}
+
+size_t SERCOM5_USART_WriteBufferSizeGet(void)
+{
+    return (sercom5USARTObj.wrBufferSize - 1U);
+}
+
+bool SERCOM5_USART_WriteNotificationEnable(bool isEnabled, bool isPersistent)
+{
+    bool previousStatus = sercom5USARTObj.isWrNotificationEnabled;
+
+    sercom5USARTObj.isWrNotificationEnabled = isEnabled;
+
+    sercom5USARTObj.isWrNotifyPersistently = isPersistent;
+
+    return previousStatus;
+}
+
+void SERCOM5_USART_WriteThresholdSet(uint32_t nBytesThreshold)
+{
+    if (nBytesThreshold > 0U)
+    {
+        sercom5USARTObj.wrThreshold = nBytesThreshold;
+    }
+}
+
+void SERCOM5_USART_WriteCallbackRegister( SERCOM_USART_RING_BUFFER_CALLBACK callback, uintptr_t context)
+{
+    sercom5USARTObj.wrCallback = callback;
+
+    sercom5USARTObj.wrContext = context;
+}
+
 
 
 void static SERCOM5_USART_ISR_ERR_Handler( void )
 {
-    USART_ERROR errorStatus = USART_ERROR_NONE;
-
-    errorStatus = (USART_ERROR) (SERCOM5_REGS->USART_INT.SERCOM_STATUS & (uint16_t)(SERCOM_USART_INT_STATUS_PERR_Msk | SERCOM_USART_INT_STATUS_FERR_Msk | SERCOM_USART_INT_STATUS_BUFOVF_Msk));
+    USART_ERROR errorStatus = (USART_ERROR)(SERCOM5_REGS->USART_INT.SERCOM_STATUS & (SERCOM_USART_INT_STATUS_PERR_Msk | SERCOM_USART_INT_STATUS_FERR_Msk | SERCOM_USART_INT_STATUS_BUFOVF_Msk ));
 
     if(errorStatus != USART_ERROR_NONE)
     {
-        /* Save the error to be reported later */
+        /* Save the error to report later */
         sercom5USARTObj.errorStatus = errorStatus;
 
-        /* Clear the error flags and flush out the error bytes */
+        /* Clear error flags and flush the error bytes */
         SERCOM5_USART_ErrorClear();
 
-        /* Disable error and receive interrupt to abort on-going transfer */
-        SERCOM5_REGS->USART_INT.SERCOM_INTENCLR = (uint8_t)(SERCOM_USART_INT_INTENCLR_ERROR_Msk | SERCOM_USART_INT_INTENCLR_RXC_Msk);
-
-        /* Clear the RX busy flag */
-        sercom5USARTObj.rxBusyStatus = false;
-
-        if(sercom5USARTObj.rxCallback != NULL)
+        if(sercom5USARTObj.rdCallback != NULL)
         {
-            sercom5USARTObj.rxCallback(sercom5USARTObj.rxContext);
+            sercom5USARTObj.rdCallback(SERCOM_USART_EVENT_READ_ERROR, sercom5USARTObj.rdContext);
         }
     }
 }
 
 void static SERCOM5_USART_ISR_RX_Handler( void )
 {
-    uint16_t temp;
 
 
-    if(sercom5USARTObj.rxBusyStatus == true)
+    while ((SERCOM5_REGS->USART_INT.SERCOM_INTFLAG & SERCOM_USART_INT_INTFLAG_RXC_Msk) == SERCOM_USART_INT_INTFLAG_RXC_Msk)
     {
-        if(sercom5USARTObj.rxProcessedSize < sercom5USARTObj.rxSize)
+        if (SERCOM5_USART_RxPushByte( (uint16_t)SERCOM5_REGS->USART_INT.SERCOM_DATA) == true)
         {
-            temp = SERCOM5_REGS->USART_INT.SERCOM_DATA;
-
-            if (((SERCOM5_REGS->USART_INT.SERCOM_CTRLB & SERCOM_USART_INT_CTRLB_CHSIZE_Msk) >> SERCOM_USART_INT_CTRLB_CHSIZE_Pos) != 0x01U)
-            {
-                /* 8-bit mode */
-                sercom5USARTObj.rxBuffer[sercom5USARTObj.rxProcessedSize++] = (uint8_t) (temp);
-            }
-            else
-            {
-                /* 9-bit mode */
-                ((uint16_t*)sercom5USARTObj.rxBuffer)[sercom5USARTObj.rxProcessedSize++] = (uint16_t) (temp);
-            }
-
-            if(sercom5USARTObj.rxProcessedSize == sercom5USARTObj.rxSize)
-            {
-                sercom5USARTObj.rxBusyStatus = false;
-                sercom5USARTObj.rxSize = 0U;
-                SERCOM5_REGS->USART_INT.SERCOM_INTENCLR = (uint8_t)(SERCOM_USART_INT_INTENCLR_RXC_Msk | SERCOM_USART_INT_INTENCLR_ERROR_Msk);
-
-                if(sercom5USARTObj.rxCallback != NULL)
-                {
-                    sercom5USARTObj.rxCallback(sercom5USARTObj.rxContext);
-                }
-            }
-
+            SERCOM5_USART_ReadNotificationSend();
+        }
+        else
+        {
+            /* UART RX buffer is full */
         }
     }
 }
 
 void static SERCOM5_USART_ISR_TX_Handler( void )
 {
-    bool  dataRegisterEmpty= false;
-    bool  dataAvailable = false;
-    if(sercom5USARTObj.txBusyStatus == true)
+    uint16_t wrByte;
+
+    while ((SERCOM5_REGS->USART_INT.SERCOM_INTFLAG & SERCOM_USART_INT_INTFLAG_DRE_Msk) == SERCOM_USART_INT_INTFLAG_DRE_Msk)
     {
-        dataAvailable = (sercom5USARTObj.txProcessedSize < sercom5USARTObj.txSize);
-        dataRegisterEmpty = ((SERCOM5_REGS->USART_INT.SERCOM_INTFLAG & SERCOM_USART_INT_INTFLAG_DRE_Msk) == SERCOM_USART_INT_INTFLAG_DRE_Msk);
-        
-        while(dataRegisterEmpty && dataAvailable)
+        if (SERCOM5_USART_TxPullByte(&wrByte) == true)
         {
             if (((SERCOM5_REGS->USART_INT.SERCOM_CTRLB & SERCOM_USART_INT_CTRLB_CHSIZE_Msk) >> SERCOM_USART_INT_CTRLB_CHSIZE_Pos) != 0x01U)
             {
-                /* 8-bit mode */
-                SERCOM5_REGS->USART_INT.SERCOM_DATA = sercom5USARTObj.txBuffer[sercom5USARTObj.txProcessedSize++];
+                SERCOM5_REGS->USART_INT.SERCOM_DATA = (uint8_t)wrByte;
             }
             else
             {
-                /* 9-bit mode */
-                SERCOM5_REGS->USART_INT.SERCOM_DATA = ((uint16_t*)sercom5USARTObj.txBuffer)[sercom5USARTObj.txProcessedSize++];
+                SERCOM5_REGS->USART_INT.SERCOM_DATA = wrByte;
             }
-            dataAvailable = (sercom5USARTObj.txProcessedSize < sercom5USARTObj.txSize);
-            dataRegisterEmpty = ((SERCOM5_REGS->USART_INT.SERCOM_INTFLAG & SERCOM_USART_INT_INTFLAG_DRE_Msk) == SERCOM_USART_INT_INTFLAG_DRE_Msk);
+
+            SERCOM5_USART_WriteNotificationSend();
         }
-
-        if(sercom5USARTObj.txProcessedSize >= sercom5USARTObj.txSize)
+        else
         {
-            sercom5USARTObj.txBusyStatus = false;
-            sercom5USARTObj.txSize = 0U;
-            SERCOM5_REGS->USART_INT.SERCOM_INTENCLR = (uint8_t)SERCOM_USART_INT_INTENCLR_DRE_Msk;
-
-            if(sercom5USARTObj.txCallback != NULL)
-            {
-                sercom5USARTObj.txCallback(sercom5USARTObj.txContext);
-            }
+            /* Nothing to transmit. Disable the data register empty interrupt. */
+            SERCOM5_USART_TX_INT_DISABLE();
+            break;
         }
     }
 }
@@ -539,9 +758,9 @@ void SERCOM5_USART_InterruptHandler( void )
             SERCOM5_USART_ISR_TX_Handler();
         }
 
-        testCondition = ((SERCOM5_REGS->USART_INT.SERCOM_INTFLAG & SERCOM_USART_INT_INTFLAG_RXC_Msk) == SERCOM_USART_INT_INTFLAG_RXC_Msk);
-        testCondition = ((SERCOM5_REGS->USART_INT.SERCOM_INTENSET & SERCOM_USART_INT_INTENSET_RXC_Msk) == SERCOM_USART_INT_INTENSET_RXC_Msk) && testCondition;
         /* Checks for receive complete empty flag */
+        testCondition = (SERCOM5_REGS->USART_INT.SERCOM_INTFLAG & SERCOM_USART_INT_INTFLAG_RXC_Msk);
+        testCondition = (SERCOM5_REGS->USART_INT.SERCOM_INTENSET & SERCOM_USART_INT_INTENSET_RXC_Msk) && testCondition;
         if(testCondition)
         {
             SERCOM5_USART_ISR_RX_Handler();

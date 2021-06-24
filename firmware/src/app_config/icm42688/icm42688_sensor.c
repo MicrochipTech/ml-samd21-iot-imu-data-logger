@@ -40,9 +40,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include "definitions.h"
 #include "sensor.h"
-#include "Icm426xxDriver_HL.h"
 
 #if SNSR_SAMPLE_RATE_UNIT == SNSR_SAMPLE_RATE_UNIT_HZ
 #define __SNSRSAMPLERATEMACRO(x, y) ICM426XX_ ## x ## _CONFIG0_ODR_ ## y ## _ ## HZ

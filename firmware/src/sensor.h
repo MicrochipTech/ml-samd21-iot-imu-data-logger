@@ -40,6 +40,7 @@
 #define	SENSOR_H
 
 #include <stdint.h>
+#include "definitions.h"
 #include "sensor_config.h"
 #include "buffer.h"
 #if SNSR_TYPE_BMI160

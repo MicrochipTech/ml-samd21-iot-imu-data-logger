@@ -76,13 +76,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: 4DB808BC45E73490F1F16F0DD7EF516B
-- generatedChecksum: 49D87ACB09E96E674DA6BC2ED2C2E9C4
+- generatedChecksum: D91A845D41FD04499A787FB2740C7367
   logicalPath: config/SAMD21_IOT_WG_ICM42688/peripheral/sercom/usart
   name: plib_sercom5_usart.c
   physicalPath: peripheral/sercom/usart
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 49D87ACB09E96E674DA6BC2ED2C2E9C4
+  userChecksum: D91A845D41FD04499A787FB2740C7367
 - generatedChecksum: 901668A7AECAE8B7188421F4A84AD20C
   logicalPath: config/SAMD21_IOT_WG_ICM42688/peripheral/systick
   name: plib_systick.c
@@ -454,13 +454,13 @@ files:
   security: NON_SECURE
   type: HEADER
   userChecksum: C4DD7CD58709A255F70E25F1C791AA73
-- generatedChecksum: 1F2B07AD392A2DAADDDBA7E5B4F4BCC3
+- generatedChecksum: 8FCF87489C52EC5F0EC90FEE597E0EEC
   logicalPath: config/SAMD21_IOT_WG_ICM42688/peripheral/sercom/usart
   name: plib_sercom5_usart.h
   physicalPath: peripheral/sercom/usart
   security: NON_SECURE
   type: HEADER
-  userChecksum: 1F2B07AD392A2DAADDDBA7E5B4F4BCC3
+  userChecksum: 8FCF87489C52EC5F0EC90FEE597E0EEC
 - generatedChecksum: BED7AF34A8D633C6994B780C19D7157F
   logicalPath: config/SAMD21_IOT_WG_ICM42688/peripheral/sercom/spi_master
   name: plib_sercom_spi_master_common.h

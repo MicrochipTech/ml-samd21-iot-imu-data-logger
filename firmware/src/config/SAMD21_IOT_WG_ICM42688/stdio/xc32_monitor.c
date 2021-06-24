@@ -53,7 +53,7 @@ int _mon_getc(int canblock)
    (void)canblock;
    do
    {
-       success = SERCOM5_USART_Read(&c, 1);                
+       success = SERCOM5_USART_Read((uint8_t *)&c, 1);                
    }while( !success);
    return c;
 }
@@ -63,7 +63,7 @@ void _mon_putc(char c)
    bool success = false;
    do
    {
-       success = SERCOM5_USART_Write(&c, 1);
+       success = SERCOM5_USART_Write((uint8_t *)&c, 1);
    }while (!success);
 }
 

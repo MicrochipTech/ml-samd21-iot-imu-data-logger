@@ -37,13 +37,13 @@
 // *****************************************************************************
 
 static volatile uint32_t tickcounter = 0;
-static volatile uint32_t tickrate = 0;
+static volatile unsigned int tickrate = 0;
 
 static struct sensor_device_t sensor;
 static struct sensor_buffer_t snsr_buffer;
 
 void Ticker_Callback(TC_TIMER_STATUS status, uintptr_t context) {
-    static int mstick = 0;
+    static unsigned int mstick = 0;
     (void) status;
     (void) context;
 
@@ -62,7 +62,7 @@ uint64_t read_timer_ms(void) {
 }
 
 uint64_t read_timer_us(void) {
-    return tickcounter * 1000U + (uint32_t) TC3_Timer16bitCounterGet();
+    return tickcounter * 1000U + (uint32_t) TC_TimerGet();
 }
 
 void sleep_ms(uint32_t ms) {
@@ -78,14 +78,14 @@ void sleep_us(uint32_t us) {
 
 // For handling read of the sensor data
 void SNSR_ISR_HANDLER(uintptr_t context) {
-    struct sensor_device_t *sensor = (struct sensor_device_t *) context;
+    (void) context;
     
     /* Check if any errors we've flagged have been acknowledged */
-    if (sensor->status != SNSR_STATUS_OK) {
+    if (sensor.status != SNSR_STATUS_OK) {
         return;
     }
     
-    sensor->status = sensor_read(sensor, &snsr_buffer);
+    sensor.status = sensor_read(&sensor, &snsr_buffer);
 }
 
 int main ( void )
@@ -94,41 +94,40 @@ int main ( void )
     SYS_Initialize ( NULL );
     
     /* Register and start the LED ticker */
-    TC3_TimerCallbackRegister(Ticker_Callback, (uintptr_t) NULL);
-    TC3_TimerStart();
+    TC_TimerCallbackRegister(Ticker_Callback);
+    TC_TimerStart();
     
     /* Activate External Interrupt Controller for sensor capture */
-    EIC_CallbackRegister(MIKRO_EIC_PIN, SNSR_ISR_HANDLER, (uintptr_t) &sensor);
-    EIC_InterruptEnable(MIKRO_EIC_PIN);
-       
+    MIKRO_INT_CallbackRegister(SNSR_ISR_HANDLER);
+    
     /* Initialize our data buffer */
     buffer_init(&snsr_buffer);
     
-    printf("\r\n");
+    printf("\n");
     
     while (1)
     {    
         if (sensor_init(&sensor) != SNSR_STATUS_OK) {
-            printf("sensor init result = %d\r\n", sensor.status);
+            printf("sensor init result = %d\n", sensor.status);
             break;
         }
         
         if (sensor_set_config(&sensor) != SNSR_STATUS_OK) {
-            printf("sensor configuration result = %d\r\n", sensor.status);
+            printf("sensor configuration result = %d\n", sensor.status);
             break;
         }
         
-        printf("sensor type is %s\r\n", SNSR_NAME);
-        printf("sensor sample rate set at %d%s\r\n", SNSR_SAMPLE_RATE, SNSR_SAMPLE_RATE_UNIT_STR);
+        printf("sensor type is %s\n", SNSR_NAME);
+        printf("sensor sample rate set at %d%s\n", SNSR_SAMPLE_RATE, SNSR_SAMPLE_RATE_UNIT_STR);
 #if SNSR_USE_ACCEL
-        printf("accelerometer axes %s%s%s enabled with range set at +/-%dGs\r\n", SNSR_USE_ACCEL_X ? "x" : "", SNSR_USE_ACCEL_Y ? "y" : "", SNSR_USE_ACCEL_Z ? "z" : "", SNSR_ACCEL_RANGE);
+        printf("accelerometer axes %s%s%s enabled with range set at +/-%dGs\n", SNSR_USE_ACCEL_X ? "x" : "", SNSR_USE_ACCEL_Y ? "y" : "", SNSR_USE_ACCEL_Z ? "z" : "", SNSR_ACCEL_RANGE);
 #else
-        printf("accelerometer disabled\r\n");
+        printf("accelerometer disabled\n");
 #endif
 #if SNSR_USE_GYRO
-        printf("gyrometer axes %s%s%s enabled with range set at %dDPS\r\n", SNSR_USE_GYRO_X ? "x" : "", SNSR_USE_GYRO_Y ? "y" : "", SNSR_USE_GYRO_Z ? "z" : "", SNSR_GYRO_RANGE);
+        printf("gyrometer axes %s%s%s enabled with range set at %dDPS\n", SNSR_USE_GYRO_X ? "x" : "", SNSR_USE_GYRO_Y ? "y" : "", SNSR_USE_GYRO_Z ? "z" : "", SNSR_GYRO_RANGE);
 #else
-        printf("gyrometer disabled\r\n");
+        printf("gyrometer disabled\n");
 #endif
         buffer_reset(&snsr_buffer);
         break;
@@ -140,11 +139,11 @@ int main ( void )
         SYS_Tasks ( );
         
         if (sensor.status != SNSR_STATUS_OK) {
-            printf("Got a bad sensor status: %d\r\n", sensor.status);
+            printf("Got a bad sensor status: %d\n", sensor.status);
             break;
         }
         else if (snsr_buffer.overrun == true) {
-            printf("\r\n\r\n\r\nOverrun!\r\n\r\n\r\n");
+            printf("\n\n\nOverrun!\n\n\n");
             
             // Light the LEDs to indicate overflow
             tickrate = 0;
@@ -157,32 +156,29 @@ int main ( void )
             continue;
         }     
         else {
-            // Feed temp buffer
             buffer_data_t *ptr;
             int rdcnt = buffer_get_read_buffer(&snsr_buffer, &ptr);
-
             while ( --rdcnt >= 0 ) {
 #if DATA_VISUALIZER_BUILD
                 uint8_t headerbyte = MPDV_START_OF_FRAME;
                 
-                SERCOM5_USART_Write(&headerbyte, 1);
-                while (SERCOM5_USART_WriteIsBusy()) { };
+                while (!SERCOM5_USART_Write(&headerbyte, 1)) { };
 
-                SERCOM5_USART_Write(ptr, SNSR_NUM_AXES*sizeof(buffer_data_t));
-                while (SERCOM5_USART_WriteIsBusy()) { };
+                for (int bytecnt=0; bytecnt < sizeof(buffer_frame_t); ) {
+                    bytecnt += SERCOM5_USART_Write((uint8_t *) ptr + bytecnt, sizeof(buffer_frame_t) - bytecnt);
+                }
                 
                 headerbyte = ~headerbyte;
-                SERCOM5_USART_Write(&headerbyte, 1);
-                while (SERCOM5_USART_WriteIsBusy()) { };
+                while (!SERCOM5_USART_Write(&headerbyte, 1)) { };
 #elif DATA_LOGGER_BUILD
                 printf("%d", ptr[0]);
                 for (int j=1; j < SNSR_NUM_AXES; j++) {
                     printf(" %d", ptr[j]);
                 }
-                printf("\r\n");
+                printf("\n");
 #endif
-                buffer_advance_read_index(&snsr_buffer, 1);
                 ptr += SNSR_NUM_AXES;
+                buffer_advance_read_index(&snsr_buffer, 1);
             }
         }
         

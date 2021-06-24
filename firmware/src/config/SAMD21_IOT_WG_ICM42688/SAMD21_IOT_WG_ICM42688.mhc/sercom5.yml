@@ -49,6 +49,19 @@ children:
         attributes: {id: enabled}
         children:
         - {type: Value, value: 'true'}
+      - type: String
+        attributes: {id: source}
+        children:
+        - {type: Value, value: ../peripheral/sercom_u2201/templates/plib_sercom_usart_ring_buffer.h.ftl}
+  - type: Comment
+    attributes: {id: SERCOM_USART_RING_BUFFER_SIZE_CONFIG}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
   - type: File
     attributes: {id: SERCOM_USART_SOURCE}
     children:
@@ -58,6 +71,10 @@ children:
         attributes: {id: enabled}
         children:
         - {type: Value, value: 'true'}
+      - type: String
+        attributes: {id: source}
+        children:
+        - {type: Value, value: ../peripheral/sercom_u2201/templates/plib_sercom_usart_ring_buffer.c.ftl}
   - type: Integer
     attributes: {id: SPI_BAUD_REG_VALUE}
     children:
@@ -131,7 +148,7 @@ children:
       - type: Dynamic
         attributes: {id: sercom5, value: '0'}
       - type: User
-        attributes: {value: '1'}
+        attributes: {value: '2'}
   - type: Boolean
     attributes: {id: USART_RING_BUFFER_ENABLE}
     children:
@@ -155,7 +172,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: sercom5, value: 'false'}
+        attributes: {id: sercom5, value: 'true'}
   - type: KeyValueSet
     attributes: {id: USART_RXPO}
     children:
@@ -163,6 +180,15 @@ children:
       children:
       - type: User
         attributes: {value: '1'}
+  - type: Integer
+    attributes: {id: USART_RX_RING_BUFFER_SIZE}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
   - type: Integer
     attributes: {id: USART_SAMPLE_COUNT}
     children:
@@ -177,6 +203,15 @@ children:
       children:
       - type: Dynamic
         attributes: {id: sercom5, value: '0'}
+  - type: Integer
+    attributes: {id: USART_TX_RING_BUFFER_SIZE}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
 - type: Attachments
   children:
   - type: DirectCapability

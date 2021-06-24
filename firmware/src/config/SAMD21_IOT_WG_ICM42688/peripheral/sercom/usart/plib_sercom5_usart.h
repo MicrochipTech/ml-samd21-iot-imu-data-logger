@@ -71,37 +71,39 @@ void SERCOM5_USART_Initialize( void );
 
 bool SERCOM5_USART_SerialSetup( USART_SERIAL_SETUP * serialSetup, uint32_t clkFrequency );
 
-void SERCOM5_USART_TransmitterEnable( void );
-
-void SERCOM5_USART_TransmitterDisable( void );
-
-bool SERCOM5_USART_Write( void *buffer, const size_t size );
-
-
-bool SERCOM5_USART_WriteIsBusy( void );
-
-size_t SERCOM5_USART_WriteCountGet( void );
-
-void SERCOM5_USART_WriteCallbackRegister( SERCOM_USART_CALLBACK callback, uintptr_t context );
-
-
-void SERCOM5_USART_ReceiverEnable( void );
-
-void SERCOM5_USART_ReceiverDisable( void );
-
-bool SERCOM5_USART_Read( void *buffer, const size_t size );
-
-bool SERCOM5_USART_ReadIsBusy( void );
-
-size_t SERCOM5_USART_ReadCountGet( void );
-
-bool SERCOM5_USART_ReadAbort(void);
-
-void SERCOM5_USART_ReadCallbackRegister( SERCOM_USART_CALLBACK callback, uintptr_t context );
-
 USART_ERROR SERCOM5_USART_ErrorGet( void );
 
 uint32_t SERCOM5_USART_FrequencyGet( void );
+
+size_t SERCOM5_USART_Write(uint8_t* pWrBuffer, const size_t size );
+
+size_t SERCOM5_USART_WriteCountGet(void);
+
+size_t SERCOM5_USART_WriteFreeBufferCountGet(void);
+
+size_t SERCOM5_USART_WriteBufferSizeGet(void);
+
+bool SERCOM5_USART_WriteNotificationEnable(bool isEnabled, bool isPersistent);
+
+void SERCOM5_USART_WriteThresholdSet(uint32_t nBytesThreshold);
+
+void SERCOM5_USART_WriteCallbackRegister( SERCOM_USART_RING_BUFFER_CALLBACK callback, uintptr_t context);
+
+
+
+size_t SERCOM5_USART_Read(uint8_t* pRdBuffer, const size_t size);
+
+size_t SERCOM5_USART_ReadCountGet(void);
+
+size_t SERCOM5_USART_ReadFreeBufferCountGet(void);
+
+size_t SERCOM5_USART_ReadBufferSizeGet(void);
+
+bool SERCOM5_USART_ReadNotificationEnable(bool isEnabled, bool isPersistent);
+
+void SERCOM5_USART_ReadThresholdSet(uint32_t nBytesThreshold);
+
+void SERCOM5_USART_ReadCallbackRegister( SERCOM_USART_RING_BUFFER_CALLBACK callback, uintptr_t context);
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
