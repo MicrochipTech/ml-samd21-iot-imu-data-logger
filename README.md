@@ -1,3 +1,4 @@
+![https://www.microchip.com/](assets/microchip.png)
 # SAMD21-IoT w/ IMU (SAMD21 ML Kit)
 
 ## Overview
