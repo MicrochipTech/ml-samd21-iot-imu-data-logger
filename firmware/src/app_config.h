@@ -33,13 +33,15 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "sensor_config.h"
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: Enumeration of available data streaming formats
 // *****************************************************************************
 // *****************************************************************************
-#define DATA_STREAMER_FORMAT_UNKNOWN    0
+// Disable all data streaming
+#define DATA_STREAMER_FORMAT_NONE       0
 
 // Dump data to uart in ascii format
 #define DATA_STREAMER_FORMAT_ASCII      1
@@ -49,9 +51,6 @@
 
 // Dump data to uart in form suitable for SensiMLs Data Capture Lab (simple stream format)
 #define DATA_STREAMER_FORMAT_SMLSS      3
-
-// Disable all data streaming
-#define DATA_STREAMER_FORMAT_NONE       4
 
 // *****************************************************************************
 // *****************************************************************************
@@ -67,22 +66,25 @@
 // IMU sampling rate in units of SNSR_SAMPLE_RATE_UNIT
 // For BMI160:
 //  - set SNSR_SAMPLE_RATE_UNIT to SNSR_SAMPLE_RATE_UNIT_HZ
-//  - set SNSR_SAMPLE_RATE to one of: 25, 50, 100, 200, 400, 800, or 1600
+//  - set SNSR_SAMPLE_RATE to one of: 25, 50, 100, 200, 400, 800, 1600
 // For ICM42688 < 1kHz range:
 //  - set SNSR_SAMPLE_RATE_UNIT to SNSR_SAMPLE_RATE_UNIT_HZ
-//  - set SNSR_SAMPLE_RATE to one of: 25, 50, 100, 200, or 500
+//  - set SNSR_SAMPLE_RATE to one of: 25, 50, 100, 200, 500
 // For ICM42688 >= 1kHz range:
 //  - set SNSR_SAMPLE_RATE_UNIT to SNSR_SAMPLE_RATE_UNIT_KHZ
-//  - set SNSR_SAMPLE_RATE to one of: 1, 2, 4, 8, or 16
-// !NB! Increasing the sample rate above 200Hz with all 6 axes when using one
-// of the data logging builds may cause buffer overruns - Change at your own risk!
+//  - set SNSR_SAMPLE_RATE to one of: 1, 2, 4, 8, 16
+// !NB! Increasing the sample rate above 200Hz with all 6 axes may cause buffer overruns
+//      - Change at your own risk!
 #define SNSR_SAMPLE_RATE        100
 #define SNSR_SAMPLE_RATE_UNIT   SNSR_SAMPLE_RATE_UNIT_HZ // HZ or KHZ
 
 // Accelerometer range in Gs
+// Either sensor supports one of: 2, 4, 8, 16
 #define SNSR_ACCEL_RANGE        16
 
 // Gyro range in DPS
+// For ICM42688 use one of: 16, 31, 62, 125, 250, 500, 1000, 2000
+// For BMI160 use one of: 125, 250, 500, 1000, 2000
 #define SNSR_GYRO_RANGE         2000
 
 // Define which axes from the IMU to use
@@ -128,10 +130,6 @@
     #define MULTI_SENSOR 0
 #endif
 
-#if !defined(DATA_STREAMER_FORMAT) || (DATA_STREAMER_FORMAT == DATA_STREAMER_FORMAT_UNKNOWN)
-    #error "No DATA_STREAMER_FORMAT type has been set"
-#endif
-
 // Provide the functions needed by sensor module
 #define snsr_read_timer_us read_timer_us
 #define snsr_read_timer_ms read_timer_ms
@@ -160,7 +158,6 @@
 #endif
 
 // Macros for portability
-#define TC_TimerCallbackRegister(cb) TC3_TimerCallbackRegister(cb, (uintptr_t) NULL)
 #define MIKRO_INT_CallbackRegister(cb) EIC_CallbackRegister(EIC_PIN_12, cb, (uintptr_t) NULL)
 #define TC_TimerStart TC3_TimerStart
 #define TC_TimerGet TC3_Timer16bitCounterGet
