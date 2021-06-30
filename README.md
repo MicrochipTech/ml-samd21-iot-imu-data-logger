@@ -1,8 +1,8 @@
 ![https://www.microchip.com/](assets/microchip.png)
-# SAMD21-IoT w/ IMU (SAMD21 ML Kit)
+# SAMD21 ML Evaluation Kit Data Logger
 
 ## Overview
-This repository contains firmware for streaming up to 6-axes IMU data over UART from one of the SAMD21 Machine Learning Evaluation Kits; the project can be configured to build firmware for both the [Bosch BMI160](https://www.microchip.com/developmenttools/ProductDetails/EV45Y33A) ([Mikroe IMU2 click board](https://www.mikroe.com/6dof-imu-2-click)) and [TDK ICM42688](https://www.microchip.com/DevelopmentTools/ProductDetails/PartNO/EV18H79A) ([Mikroe IMU14 click board](https://www.mikroe.com/6dof-imu-14-click)) variants streaming using one of several formats as described in the sections below.
+This repository contains firmware for streaming up to 6-axes IMU data over UART from one of the SAMD21 Machine Learning Evaluation Kits; the project can be configured to build firmware for both the [Bosch BMI160](https://www.microchip.com/developmenttools/ProductDetails/EV45Y33A) ([Mikroe IMU2 click board](https://www.mikroe.com/6dof-imu-2-click)) and [TDK ICM42688](https://www.microchip.com/DevelopmentTools/ProductDetails/PartNO/EV18H79A) ([Mikroe IMU14 click board](https://www.mikroe.com/6dof-imu-14-click)) variants, streaming using one of several formats as described in the sections below.
 
 | ![ml eval kits](assets/mlkits.png) |
 | :--: |
