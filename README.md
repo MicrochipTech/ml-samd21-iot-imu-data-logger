@@ -1,41 +1,71 @@
 ![https://www.microchip.com/](assets/microchip.png)
 # SAMD21 ML Evaluation Kit Data Logger
-
-## Overview
-This repository contains firmware for streaming up to 6-axes IMU data over UART from one of the SAMD21 Machine Learning Evaluation Kits; the project can be configured to build firmware for both the [Bosch BMI160](https://www.microchip.com/developmenttools/ProductDetails/EV45Y33A) ([Mikroe IMU2 click board](https://www.mikroe.com/6dof-imu-2-click)) and [TDK ICM42688](https://www.microchip.com/DevelopmentTools/ProductDetails/PartNO/EV18H79A) ([Mikroe IMU14 click board](https://www.mikroe.com/6dof-imu-14-click)) variants, streaming using one of several formats as described in the sections below.
+## Repository Overview
+This repository contains firmware for streaming up to 6-axes IMU data over UART from one of the SAMD21 Machine Learning Evaluation Kits (SAM-IoT + MikroE IMU2/IMU14 Click Board); the project can be configured to build firmware for both the Bosch IMU and TDK IMU variants, streaming using one of several formats as described in the sections below.
 
 | ![ml eval kits](assets/mlkits.png) |
 | :--: |
 | *Microchip Machine Learning Evaluation Kits* |
 
-## Sensor Selection
-Before building the firmware, select the appropriate MPLAB X Project Configuration for your sensor according to the table below.
+## Hardware Used
+* SAMD21 Machine Learning Evaluation Kit with Bosch BMI160 IMU [(EV45Y33A)](https://www.microchip.com/developmenttools/ProductDetails/EV45Y33A)
+* SAMD21 Machine Learning Evaluation Kit with TDK ICM42688 IMU [(EV18H79A)](https://www.microchip.com/developmenttools/ProductDetails/EV18H79A)
 
-| Sensor Type | MPLAB X Project Configuration Selection |
-| --- | --- |
-| [Bosch BMI160 IMU](https://www.microchip.com/developmenttools/ProductDetails/EV45Y33A) ([Mikroe IMU2 click board](https://www.mikroe.com/6dof-imu-2-click)) | `SAMD21_IOT_WG_BMI160` |
-| [TDK ICM42688 IMU](https://www.microchip.com/DevelopmentTools/ProductDetails/PartNO/EV18H79A) ([Mikroe IMU14 click board](https://www.mikroe.com/6dof-imu-14-click)) | `SAMD21_IOT_WG_ICM42688` |
+## Software Used
+* MPLAB® X IDE (https://microchip.com/mplab/mplab-x-ide)
+* MPLAB® XC32 compiler (https://microchip.com/mplab/compilers)
+* MPLAB® Harmony 3 (https://www.microchip.com/harmony)
 
-Project configuration can be set in the MPLAB X toolbar drop down menu as shown in the image below
+## Related Documentation
+* ATSAMD21G18 [Product Family Page](https://www.microchip.com/wwwproducts/en/ATSAMD21G18)
+* SAM-IoT WG Development Board [Product Details](https://www.microchip.com/developmenttools/ProductDetails/EV75S95A)
 
-| ![project config](assets/mplab-x-project-config.png) |
-| :--: |
-| *MPLAB X Project Configuration Selection* |
+# How to Configure, Compile, and Flash
+The steps below explain the process of configuring the the data logger firmware build, compiling it, and flashing it to the SAMD21 device.
 
-## Streaming Format Selection
-To select the data streaming format, set the `DATA_STREAMER_FORMAT` macro in `firmware/src/app_config.h` to the appropriate value as explained in the table below.
+1. Plug your SAMD21 evaluation kit into your PC via USB.
+2. Install the MPLAB X IDE and XC32 compiler. These are required to load the data logger project and to program the SAMD21 board.
+3. Open the `firmware/samd21_iot_imu.X` project folder in MPLAB X.
+4. Select the appropriate MPLAB X Project Configuration for your sensor according to the table below.
+   | Sensor Type | MPLAB X Project Configuration Selection |
+   | --- | --- |
+   | Bosch BMI160 IMU | `SAMD21_IOT_WG_BMI160` |
+   | TDK ICM42688 IMU | `SAMD21_IOT_WG_ICM42688` |
 
-| Streaming Format | app_config.h Configuration Value |
-| --- | --- |
-| ASCII text | `#define DATA_STREAMER_FORMAT DATA_STREAMER_FORMAT_ASCII` |
-| [MPLAB Data Visualizer](https://www.microchip.com/en-us/development-tools-tools-and-software/embedded-software-center/mplab-data-visualizer) stream | `#define DATA_STREAMER_FORMAT DATA_STREAMER_FORMAT_MDV` |
-| [SensiML Simple Stream](https://sensiml.com/documentation/simple-streaming-specification/introduction.html) | `#define DATA_STREAMER_FORMAT DATA_STREAMER_FORMAT_SMLSS` |
+   Project configuration can be set in the MPLAB X toolbar drop down menu as shown in the image below
 
-## Sensor Configuration Parameters
-High level sensor parameters like sample rate and axes selection can be configured by modifying the macro values defined in `firmware/src/app_config.h`. See the inline comments for further description.
+   | ![project config](assets/mplab-x-project-config.png) |
+   | :--: |
+   | *MPLAB X Project Configuration Selection* |
+5. Select the data streaming format you want by setting the `DATA_STREAMER_FORMAT` macro in `firmware/src/app_config.h` to the appropriate value as summarized in the table below.
+   | Streaming Format | app_config.h Configuration Value |
+   | --- | --- |
+   | ASCII text | `#define DATA_STREAMER_FORMAT DATA_STREAMER_FORMAT_ASCII` |
+   | [MPLAB Data Visualizer](https://www.microchip.com/en-us/development-tools-tools-and-software/embedded-software-center/mplab-data-visualizer) stream | `#define DATA_STREAMER_FORMAT DATA_STREAMER_FORMAT_MDV` |
+   | [SensiML Simple Stream](https://sensiml.com/documentation/simple-streaming-specification/introduction.html) | `#define DATA_STREAMER_FORMAT DATA_STREAMER_FORMAT_SMLSS` |
+6. Modify high level sensor parameters like sample rate (`SNSR_SAMPLE_RATE`), accelerometer range (`SNSR_ACCEL_RANGE`), and others by changing the macro values defined in `firmware/src/app_config.h`. See the inline comments for further description.
+7. Once you're satistfied with your configuration, click the *Make and Program Device* button in the toolbar (see image below for reference).
+   | ![make and program device](assets/make-and-program.png) |
+   | :--: |
+   | *Make and Program Device* |
 
-## Usage with the MPLAB Data Visualizer and Machine Learning Plugins
-This project can be used to generate firmware for streaming data to the [MPLAB Data Visualizer plugin](https://www.microchip.com/en-us/development-tools-tools-and-software/embedded-software-center/mplab-data-visualizer) by setting the `DATA_STREAMER_FORMAT` macro as described in [the section above](#streaming-format-selection). Once the firmware is flashed, follow the steps below to set up Data Visualizer.
+# Firmware Operation
+The data streamer firmware will output sensor data over the UART port with the following UART settings:
+
+* Baudrate 115200
+* Data bits 8
+* Stop bits 1
+* Parity None
+
+In addition, the onboard LEDs will indicate errors occurring in the firmware as summarized in the table below:
+
+| State |	LED Behavior |	Description |
+| --- | --- | --- |
+| Error |	Red (ERROR) LED lit |	Fatal error. (Do you have the correct sensor plugged in?). |
+| Buffer Overflow |	Yellow (DATA) and Red (ERROR) LED lit for 5 seconds	| Processing is not able to keep up with real-time; data buffer has been reset. |
+
+# Usage with the MPLAB Data Visualizer and Machine Learning Plugins
+This project can be used to generate firmware for streaming data to the [MPLAB Data Visualizer plugin](https://www.microchip.com/en-us/development-tools-tools-and-software/embedded-software-center/mplab-data-visualizer) by setting the `DATA_STREAMER_FORMAT` macro as described above. Once the firmware is flashed, follow the steps below to set up Data Visualizer.
 
 1. Connect the SAMD21 board to your computer, open up MPLAB X, and open the Data Visualizer plugin.
 2. Click the *Load Workspace* button as highlighted in the image below. Select one of the workspace files included in this repository - located under the `mplab-dv-workspaces` folder - whose name most closely describes your sensor configuration; you can always modify the configuration once it is loaded if needed.
