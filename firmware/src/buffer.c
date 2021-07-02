@@ -65,6 +65,7 @@ void buffer_reset(struct sensor_buffer_t *buffer) {
     buffer->readIdx = 0;
     buffer->writeIdx = 0;
     memset(buffer->data[0], 0, sizeof(buffer_frame_t));
+    buffer->underrun = false;
     buffer->overrun = false;
 }
 
