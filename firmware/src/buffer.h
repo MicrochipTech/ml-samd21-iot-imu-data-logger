@@ -54,7 +54,8 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include "buffer_config.h"
+#include <stdint.h>
+#include "sensor_config.h"
 
 #ifndef SNSR_NUM_AXES
 #error "SNSR_NUM_AXES must be defined"
@@ -64,6 +65,10 @@
 #error "SNSR_BUF_LEN must be defined"
 #endif
 
+#if (((SNSR_BUF_LEN-1) & SNSR_BUF_LEN) != 0) 
+#error "SNSR_BUF_LEN must be a power of 2"
+#endif
+
 #ifndef SNSR_DATA_TYPE
 #error "SNSR_DATA_TYPE must be defined"
 #endif
@@ -71,15 +76,29 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
-
+    
 typedef SNSR_DATA_TYPE buffer_data_t;
 
 typedef buffer_data_t buffer_frame_t[SNSR_NUM_AXES];
 
+// !!!NB!!!
+// buffer_size_t MUST be set to a type whose size is <= the data bus width
+// this makes loads and stores of the read/write index atomic
+// Otherwise, we'd have to get interrupt masking involved..
+#if defined(__AVR__)
+    typedef uint8_t buffer_size_t;
+#elif defined (__arm__)
+    typedef uint32_t buffer_size_t;
+#else
+#   warning "buffer.h:: Unsure about architecture, assuming 32-bit accesses are atomic"    
+    typedef uint32_t buffer_size_t;
+#endif
+
 struct sensor_buffer_t {
     buffer_data_t data[SNSR_BUF_LEN][SNSR_NUM_AXES];
-    volatile int writeIdx;
-    volatile int readIdx;
+    volatile buffer_size_t writeIdx;
+    volatile buffer_size_t readIdx;
+    buffer_size_t _mask;
     volatile bool overrun;
     volatile bool underrun;
 };
@@ -88,21 +107,21 @@ void buffer_init(struct sensor_buffer_t *buffer);
 
 void buffer_reset(struct sensor_buffer_t *buffer);
 
-size_t buffer_read(struct sensor_buffer_t *buffer, buffer_data_t dst[][SNSR_NUM_AXES], size_t framecount);
+buffer_size_t buffer_read(struct sensor_buffer_t *buffer, buffer_data_t dst[][SNSR_NUM_AXES], buffer_size_t framecount);
 
-size_t buffer_write(struct sensor_buffer_t *buffer, buffer_data_t data[][SNSR_NUM_AXES], size_t framecount);
+buffer_size_t buffer_write(struct sensor_buffer_t *buffer, buffer_data_t data[][SNSR_NUM_AXES], buffer_size_t framecount);
 
-size_t buffer_get_read_frames(struct sensor_buffer_t *buffer);
+buffer_size_t buffer_get_read_frames(struct sensor_buffer_t *buffer);
 
-size_t buffer_get_write_frames(struct sensor_buffer_t *buffer);
+buffer_size_t buffer_get_write_frames(struct sensor_buffer_t *buffer);
 
-size_t buffer_get_read_buffer(struct sensor_buffer_t *buffer, buffer_data_t **ptr);
+buffer_size_t buffer_get_read_buffer(struct sensor_buffer_t *buffer, buffer_data_t **ptr);
 
-size_t buffer_get_write_buffer(struct sensor_buffer_t *buffer, buffer_data_t **ptr);
+buffer_size_t buffer_get_write_buffer(struct sensor_buffer_t *buffer, buffer_data_t **ptr);
 
-bool buffer_advance_write_index(struct sensor_buffer_t *buffer, size_t framecount);
+bool buffer_advance_write_index(struct sensor_buffer_t *buffer, buffer_size_t framecount);
 
-bool buffer_advance_read_index(struct sensor_buffer_t *buffer, size_t framecount);
+bool buffer_advance_read_index(struct sensor_buffer_t *buffer, buffer_size_t framecount);
 
 #ifdef	__cplusplus
 }

@@ -53,9 +53,26 @@
 #include <string.h>
 #include "buffer.h"
 
+// Define the compiler fence directive to use
+// This directive ensures that all data memory operations complete before 
+// the updating of the read or write index
+// We assume this is running a simple processor which doesn't have out of order execution
+#if defined(__arm__)
+// Full compiler/memory barrier
+#define barrier()        asm volatile ("dsb" ::: "memory")
+#elif defined(__GNUC__)
+// This directive only ensures the *compiler* doesn't reorder data memory operations before 
+// the updating of the read or write index 
+// - this is enough on platforms that don't do out of order execution
+#define barrier()        asm volatile ("" ::: "memory")
+#else
+#define barrier()
+#warning "buffer.c:: No memory barrier defined; thread safety not guaranteed"
+#endif
 
 void buffer_init(struct sensor_buffer_t *buffer) {
     memset(buffer, 0, sizeof(struct sensor_buffer_t));
+    buffer->_mask = SNSR_BUF_LEN - 1;
 }
 
 // Only the reader should call this function, and ONLY if overrun has already occurred
@@ -64,118 +81,73 @@ void buffer_reset(struct sensor_buffer_t *buffer) {
     buffer->overrun = true; // Freeze buffering from the writer while we reset things
     buffer->readIdx = 0;
     buffer->writeIdx = 0;
-    memset(buffer->data[0], 0, sizeof(buffer_frame_t));
     buffer->underrun = false;
     buffer->overrun = false;
 }
 
-size_t buffer_read(struct sensor_buffer_t *buffer, buffer_data_t dst[][SNSR_NUM_AXES], size_t framecount) {
-    size_t writeIdx = buffer->writeIdx;
-    size_t readIdx = buffer->readIdx;
-    size_t toread = framecount;
-    size_t rdcnt;
+buffer_size_t buffer_read(struct sensor_buffer_t *buffer, buffer_data_t dst[][SNSR_NUM_AXES], buffer_size_t framecount) {
+    buffer_size_t availframes = buffer_get_read_frames(buffer);
+    buffer_data_t *ptr;
+    buffer_size_t rdcnt = buffer_get_read_buffer(buffer, &ptr);
+    bool underrun = framecount > availframes;
     
-    // Handle wrap around reads
-    if (writeIdx < readIdx) {
-        rdcnt = SNSR_BUF_LEN - readIdx;
-        if (rdcnt > toread)
-            rdcnt = toread;
-        memcpy(dst[framecount-toread], buffer->data[readIdx], rdcnt*sizeof(buffer_frame_t));
-        readIdx = (readIdx + rdcnt) % SNSR_BUF_LEN;
-        toread -= rdcnt;
-    }
-
-    if ((toread > 0) && (writeIdx > readIdx)) {
-        rdcnt = writeIdx - readIdx;
-        if (rdcnt > toread)
-            rdcnt = toread;
-        memcpy(dst[framecount-toread], buffer->data[readIdx], rdcnt*sizeof(buffer_frame_t));
-        readIdx += rdcnt;
-        toread -= rdcnt;
-    }
-
-    // NB! Memory operations *must* be completed before updating the index
+    // Block from reading until this flag is cleared
+//    if (buffer->underrun)
+//        return 0;
     
-    buffer->readIdx = readIdx;
+    if (underrun)
+        framecount = availframes;
     
-    return framecount - toread;
-}
-
-size_t buffer_write(struct sensor_buffer_t *buffer, buffer_data_t data[][SNSR_NUM_AXES], size_t framecount) {   
-    size_t readIdx = buffer->readIdx;
-    size_t writeIdx = buffer->writeIdx;
-    size_t towrite = framecount;
-    size_t wrcnt;
-    
-    // If overrun is already flagged, don't attempt to write any more data
-    if (buffer->overrun == true) {
-        return 0;
-    }
-    
-    if (towrite == 0) {
-        // Return here as this case can falsely trigger an overrun
-        return 0;
-    }
-    
-    // Handle wrap around writes
-    if (readIdx <= writeIdx) {
-        wrcnt = SNSR_BUF_LEN - writeIdx;
-        if (wrcnt > towrite)
-            wrcnt = towrite;
-        memcpy(buffer->data[writeIdx], data[framecount-towrite], wrcnt*sizeof(buffer_frame_t));
-        writeIdx = (writeIdx + wrcnt) % SNSR_BUF_LEN;
-        towrite -= wrcnt;
-    }
-    
-    if ((towrite > 0) && (readIdx > writeIdx)) {
-        wrcnt = readIdx - writeIdx;
-        if (wrcnt > towrite)
-            wrcnt = towrite;
-        memcpy(buffer->data[writeIdx], data[framecount-towrite], wrcnt*sizeof(buffer_frame_t));
-        writeIdx += wrcnt;
-        towrite -= wrcnt;
-    }
-        
-    /* Flag overrun condition */
-    /* (Note for simplicity this declares overrun 1 frame before overrun actually occurs) */
-    if (writeIdx == readIdx) {
-        buffer->overrun = true;
-    }
-    
-    // NB! Memory operations *must* be completed before updating the index
-   
-    buffer->writeIdx = writeIdx;
-    
-    return framecount - towrite;
-}
-
-size_t buffer_get_read_frames(struct sensor_buffer_t *buffer) {
-    size_t writeIdx = buffer->writeIdx;
-    size_t readIdx = buffer->readIdx;
-    
-    if (writeIdx < readIdx) {
-        return writeIdx - readIdx + SNSR_BUF_LEN;
+    if (rdcnt >= framecount) {
+        memcpy(dst[0], ptr, framecount*sizeof(buffer_frame_t));
     }
     else {
-        return writeIdx - readIdx;
+        memcpy(dst[0], ptr, rdcnt*sizeof(buffer_frame_t));
+        memcpy(buffer->data[0], dst[rdcnt], (framecount - rdcnt)*sizeof(buffer_frame_t));
     }
+    
+    buffer_advance_read_index(buffer, framecount);
+    buffer->underrun = underrun;
+    return framecount;
 }
 
-size_t buffer_get_write_frames(struct sensor_buffer_t *buffer) {
-    size_t readIdx = buffer->readIdx;
-    size_t writeIdx = buffer->writeIdx;
+buffer_size_t buffer_write(struct sensor_buffer_t *buffer, buffer_data_t data[][SNSR_NUM_AXES], buffer_size_t framecount) {   
+    buffer_size_t availframes = buffer_get_write_frames(buffer);
+    buffer_data_t *ptr;
+    buffer_size_t wrcnt = buffer_get_write_buffer(buffer, &ptr);
+    bool overrun = framecount > availframes;
     
-    if (readIdx <= writeIdx) {
-        return readIdx - writeIdx - 1 + SNSR_BUF_LEN;
+    // Block from writing until this flag is cleared
+    if (buffer->overrun)
+        return 0;
+    
+    if (overrun)
+        framecount = availframes;
+    
+    if (wrcnt >= framecount) {
+        memcpy(ptr, data[0], framecount*sizeof(buffer_frame_t));
     }
     else {
-        return readIdx - writeIdx - 1;
+        memcpy(ptr, data[0], wrcnt*sizeof(buffer_frame_t));
+        memcpy(buffer->data[0], data[wrcnt], (framecount - wrcnt)*sizeof(buffer_frame_t));
     }
+    
+    buffer_advance_write_index(buffer, framecount);
+    buffer->overrun = overrun;
+    return framecount;
 }
 
-size_t buffer_get_read_buffer(struct sensor_buffer_t *buffer, buffer_data_t **ptr) {
-    size_t writeIdx = buffer->writeIdx;
-    size_t readIdx = buffer->readIdx;
+buffer_size_t buffer_get_read_frames(struct sensor_buffer_t *buffer) {
+    return (buffer->writeIdx - buffer->readIdx) & buffer->_mask;
+}
+
+buffer_size_t buffer_get_write_frames(struct sensor_buffer_t *buffer) {
+    return (buffer->readIdx - buffer->writeIdx - 1) & buffer->_mask;
+}
+
+buffer_size_t buffer_get_read_buffer(struct sensor_buffer_t *buffer, buffer_data_t **ptr) {
+    buffer_size_t writeIdx = buffer->writeIdx;
+    buffer_size_t readIdx = buffer->readIdx;
     
     *ptr = buffer->data[readIdx];
     
@@ -187,9 +159,9 @@ size_t buffer_get_read_buffer(struct sensor_buffer_t *buffer, buffer_data_t **pt
     }
 }
 
-size_t buffer_get_write_buffer(struct sensor_buffer_t *buffer, buffer_data_t **ptr) {
-    size_t readIdx = buffer->readIdx;
-    size_t writeIdx = buffer->writeIdx;
+buffer_size_t buffer_get_write_buffer(struct sensor_buffer_t *buffer, buffer_data_t **ptr) {
+    buffer_size_t readIdx = buffer->readIdx;
+    buffer_size_t writeIdx = buffer->writeIdx;
     
     *ptr = buffer->data[writeIdx];
     
@@ -201,46 +173,40 @@ size_t buffer_get_write_buffer(struct sensor_buffer_t *buffer, buffer_data_t **p
     }
 }
 
-bool buffer_advance_read_index(struct sensor_buffer_t *buffer, size_t framecount) {
-    size_t availframes = buffer_get_read_frames(buffer);
+bool buffer_advance_read_index(struct sensor_buffer_t *buffer, buffer_size_t framecount) {
+    buffer_size_t availframes = buffer_get_read_frames(buffer);
+    buffer_size_t newIdx;
     
-    if (buffer->underrun) {
-        // If underrun is already flagged, don't attempt to read any more data
-        return false;
-    }
+    // If underrun is already flagged, don't attempt to read any more data
+//    if (buffer->underrun)
+//        return false;
     
-    // Do not allow reader to go past the current write index
-    // NB: this could lead to unexpected behavior; user should never do this
-    if (availframes < framecount) {
-        buffer->underrun = true;
-    }
+    // Note we advance the read index like the user asks regardless of underrun
+    newIdx = (buffer->readIdx + framecount) & buffer->_mask;
     
-    // __DMB();
+    barrier();
+    buffer->readIdx = newIdx;
     
-    // Note we advance the write index like the user asks regardless of underrun
-    buffer->readIdx = (buffer->readIdx + framecount) % SNSR_BUF_LEN;
-    
-    return !buffer->underrun;
+    return !(buffer->underrun = availframes < framecount);
 }
 
-bool buffer_advance_write_index(struct sensor_buffer_t *buffer, size_t framecount) {
-    size_t availframes = buffer_get_write_frames(buffer);
+bool buffer_advance_write_index(struct sensor_buffer_t *buffer, buffer_size_t framecount) {
+    buffer_size_t availframes = buffer_get_write_frames(buffer);
+    buffer_size_t newIdx;
     
-    if (buffer->overrun == true) {
-        // If overrun is already flagged, don't attempt to write any more data
+    // If overrun is already flagged, don't attempt to write any more data
+    if (buffer->overrun)
         return false;
-    }
-    
-    /* Flag overrun condition */
-    /* (Note for simplicity this declares overrun 1 frame before overrun actually occurs) */
-    if (availframes < framecount) {
-        buffer->overrun = true;
-    }
-    
-    // __DMB();
     
     // Note we advance the write index like the user asks regardless of overrun
-    buffer->writeIdx = (buffer->writeIdx + framecount) % SNSR_BUF_LEN;
+    newIdx = (buffer->writeIdx + framecount) & buffer->_mask;
     
-    return !buffer->overrun;
+    // Additionally, must make sure to flush any unfinished reads of writeIdx since
+    // it may take more than one cycle to access
+    barrier();
+    buffer->writeIdx = newIdx;
+    
+    /* Flag overrun condition */
+    /* (Note for simplicity this declares overrun 1 frame before overrun actually occurs) */    
+    return !(buffer->overrun = availframes < framecount);
 }
