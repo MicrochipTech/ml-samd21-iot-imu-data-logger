@@ -13,13 +13,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: 7B28C61C79152B91D1D6B596B5C38E8A
-- generatedChecksum: 731900DAF10D124DF7104988BC58B33B
+- generatedChecksum: 8D7BFAB63A9DB8F06AD01385ACCFD3AF
   logicalPath: config/SAMD21_IOT_WG_BMI160
   name: interrupts.c
   physicalPath: ''
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 731900DAF10D124DF7104988BC58B33B
+  userChecksum: 8D7BFAB63A9DB8F06AD01385ACCFD3AF
 - generatedChecksum: 6513F2461B8F476B68CA73906086047F
   logicalPath: config/SAMD21_IOT_WG_BMI160
   name: libc_syscalls.c
@@ -76,13 +76,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: ACA71599E8685D8BB3066249F0BF69DA
-- generatedChecksum: D91A845D41FD04499A787FB2740C7367
+- generatedChecksum: D5A2BB3136B2C59F3DCE449D75A77387
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/sercom/usart
   name: plib_sercom5_usart.c
   physicalPath: peripheral/sercom/usart
   security: NON_SECURE
   type: SOURCE
-  userChecksum: D91A845D41FD04499A787FB2740C7367
+  userChecksum: D5A2BB3136B2C59F3DCE449D75A77387
 - generatedChecksum: B8E7D9ADF1C4AEA2903AB12F0E5F9C64
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/systick
   name: plib_systick.c
@@ -335,13 +335,13 @@ files:
   security: NON_SECURE
   type: HEADER
   userChecksum: 4017D6C4D2082CB4A87FEFE5411B6559
-- generatedChecksum: 4D24C4CE69F3994FB2FB8CD4A1F2C3ED
+- generatedChecksum: 96C7C2600004A7B5FCBA185935C8F7E1
   logicalPath: config/SAMD21_IOT_WG_BMI160
   name: interrupts.h
   physicalPath: ''
   security: NON_SECURE
   type: HEADER
-  userChecksum: 4D24C4CE69F3994FB2FB8CD4A1F2C3ED
+  userChecksum: 96C7C2600004A7B5FCBA185935C8F7E1
 - generatedChecksum: B96ADDA2C111E73B26EBA5E7B4498912
   logicalPath: packs/CMSIS/CMSIS/Core/Include
   name: mpu_armv7.h
@@ -454,13 +454,13 @@ files:
   security: NON_SECURE
   type: HEADER
   userChecksum: 43B4A52EBF9A4D3D4479988420940683
-- generatedChecksum: 8FCF87489C52EC5F0EC90FEE597E0EEC
+- generatedChecksum: 50E4F02F3767097B441D2DD6A0CADBEE
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/sercom/usart
   name: plib_sercom5_usart.h
   physicalPath: peripheral/sercom/usart
   security: NON_SECURE
   type: HEADER
-  userChecksum: 8FCF87489C52EC5F0EC90FEE597E0EEC
+  userChecksum: 50E4F02F3767097B441D2DD6A0CADBEE
 - generatedChecksum: 555AC09B32F566FBFB0A0505CF73ABD6
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/sercom/i2c_master
   name: plib_sercom_i2c_master_common.h

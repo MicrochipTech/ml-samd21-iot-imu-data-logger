@@ -16,7 +16,6 @@
  * limitations under the License.
  *==========================================================*/
 #include "app_config.h"
-#include "definitions.h"
 #include "ssi_comms.h"
 #include <inttypes.h>
 #include <stdbool.h>

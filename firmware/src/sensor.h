@@ -40,7 +40,6 @@
 #define	SENSOR_H
 
 #include <stdint.h>
-#include "definitions.h"
 #include "sensor_config.h"
 #include "buffer.h"
 #if SNSR_TYPE_BMI160
@@ -54,6 +53,8 @@
 #elif SNSR_TYPE_ICM42688
     #define SNSR_STATUS_OK INV_ERROR_SUCCESS
 #endif
+
+#define SNSR_COM_BUF_SIZE   1024
 
 #ifdef	__cplusplus
 extern "C" {

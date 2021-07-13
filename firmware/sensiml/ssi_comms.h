@@ -22,7 +22,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <inttypes.h>
-#define SSI_JSON_CONFIG_VERSION    (1)     /* 2 => Use enhance SSI protocol, 1 => use original SSI protocol */
+#include <stddef.h>
+#define SSI_JSON_CONFIG_VERSION    (2)     /* 2 => Use enhance SSI protocol, 1 => use original SSI protocol */
 #define SSI_SYNC_DATA              (0xFF)
 #define SSI_HEADER_SIZE            (9)     ///< SSI v2 header size in bytes
 #define SSI_MAX_CHANNELS           (4)
@@ -41,7 +42,7 @@ typedef struct
     uart_rw ssi_read;
     uart_rw ssi_write;
     bool initialized;
-    bool connected;
+    volatile bool connected;
 } ssi_io_funcs_t;
 
 void ssi_init(ssi_io_funcs_t* p_interface);

@@ -4,11 +4,11 @@
 
 
 project: tmp
-creation_date: 2021-06-24T17:16:24.372-05:00[America/Chicago]    # ISO 8601 format: https://www.w3.org/TR/NOTE-datetime
+creation_date: 2021-07-12T22:07:18.858-05:00[America/Chicago]    # ISO 8601 format: https://www.w3.org/TR/NOTE-datetime
 operating_system: Windows 10
 mhc_mode: IDE            # [IDE|Standalone|Headless]
 mhc_version: v3.7.2
-mplabx_version: v5.50        # if MPLAB X plugin only
+mplabx_version: v5.45        # if MPLAB X plugin only
 plugin_version: v3.6.4        # if MPLAB X plugin only
 compiler: XC32 (3.00)
 

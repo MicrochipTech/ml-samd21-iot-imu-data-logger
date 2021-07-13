@@ -40,6 +40,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "sensor.h"
+#include "definitions.h"
 
 // Macro function to get the proper Macro defines corresponding to SNSR_SAMPLE_RATE
 #if (SNSR_SAMPLE_RATE_UNIT == SNSR_SAMPLE_RATE_UNIT_KHZ)

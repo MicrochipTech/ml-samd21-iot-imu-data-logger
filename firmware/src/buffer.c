@@ -1,32 +1,4 @@
 /*******************************************************************************
-  Sensor Buffering Interface Source File
-
-  Company:
-    Microchip Technology Inc.
-
-  File Name:
-    buffer.c
-
-  Summary:
-    This file contains the ring buffer API used for buffering sensor data
-
-  Description:
-    This file implements a buffering interface for a 2d array of a single data 
-    type with statically allocated memory. The buffer has the behavior that on 
-    overrun condition, new incoming data will be ignored until the buffer_reset 
-    function is called.
- 
-  Notes:
-    - The API provided here is strictly designed for a single reader thread and 
-      single writer thread; other uses will cause race conditions.
-    - It's further assumed that the reader will *never* interrupt the writer to 
-      call buffer_reset
-    - This API does not account for the possibility of out of order
-      execution - in such a case memory synchronization primitives must be 
-      introduced.
- *******************************************************************************/
-
-/*******************************************************************************
 * Copyright (C) 2020 Microchip Technology Inc. and its subsidiaries.
 *
 * Subject to your compliance with these terms, you may use Microchip software
@@ -52,23 +24,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include "buffer.h"
-
-// Define the compiler fence directive to use
-// This directive ensures that all data memory operations complete before 
-// the updating of the read or write index
-// We assume this is running a simple processor which doesn't have out of order execution
-#if defined(__arm__)
-// Full compiler/memory barrier
-#define barrier()        asm volatile ("dsb" ::: "memory")
-#elif defined(__GNUC__)
-// This directive only ensures the *compiler* doesn't reorder data memory operations before 
-// the updating of the read or write index 
-// - this is enough on platforms that don't do out of order execution
-#define barrier()        asm volatile ("" ::: "memory")
-#else
-#define barrier()
-#warning "buffer.c:: No memory barrier defined; thread safety not guaranteed"
-#endif
 
 void buffer_init(struct sensor_buffer_t *buffer) {
     memset(buffer, 0, sizeof(struct sensor_buffer_t));
@@ -103,7 +58,7 @@ buffer_size_t buffer_read(struct sensor_buffer_t *buffer, buffer_data_t dst[][SN
     }
     else {
         memcpy(dst[0], ptr, rdcnt*sizeof(buffer_frame_t));
-        memcpy(buffer->data[0], dst[rdcnt], (framecount - rdcnt)*sizeof(buffer_frame_t));
+        memcpy(dst[rdcnt], buffer->data[0], (framecount - rdcnt)*sizeof(buffer_frame_t));
     }
     
     buffer_advance_read_index(buffer, framecount);
@@ -184,7 +139,7 @@ bool buffer_advance_read_index(struct sensor_buffer_t *buffer, buffer_size_t fra
     // Note we advance the read index like the user asks regardless of underrun
     newIdx = (buffer->readIdx + framecount) & buffer->_mask;
     
-    barrier();
+    __buffer_sync();
     buffer->readIdx = newIdx;
     
     return !(buffer->underrun = availframes < framecount);
@@ -201,9 +156,7 @@ bool buffer_advance_write_index(struct sensor_buffer_t *buffer, buffer_size_t fr
     // Note we advance the write index like the user asks regardless of overrun
     newIdx = (buffer->writeIdx + framecount) & buffer->_mask;
     
-    // Additionally, must make sure to flush any unfinished reads of writeIdx since
-    // it may take more than one cycle to access
-    barrier();
+    __buffer_sync();
     buffer->writeIdx = newIdx;
     
     /* Flag overrun condition */

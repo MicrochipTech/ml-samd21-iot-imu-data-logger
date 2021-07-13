@@ -204,7 +204,7 @@
       <itemPath>../src/sensor.h</itemPath>
       <itemPath>../src/app_config.h</itemPath>
       <itemPath>../src/sensor_config.h</itemPath>
-      <itemPath>../src/buffer_config.h</itemPath>
+      <itemPath>../src/ringbuffer.h</itemPath>
     </logicalFolder>
     <logicalFolder displayName="Linker Files" name="LinkerScript" projectFiles="true">
       <logicalFolder displayName="config" name="f1" projectFiles="true">
@@ -329,6 +329,7 @@
       </logicalFolder>
       <itemPath>../src/buffer.c</itemPath>
       <itemPath>../src/main.c</itemPath>
+      <itemPath>../src/ringbuffer.c</itemPath>
     </logicalFolder>
     <logicalFolder displayName="Important Files" name="ExternalFiles" projectFiles="false">
       <logicalFolder displayName="SAMD21_IOT_WG_BMI160.mhc" name="f1" projectFiles="true">
@@ -389,8 +390,8 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="CMSIS" vendor="ARM" version="5.4.0"/>
         <pack name="SAMD21_DFP" vendor="Microchip" version="3.4.116"/>
+        <pack name="CMSIS" vendor="ARM" version="5.4.0"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -658,6 +659,32 @@
         </C32CPP>
         <C32Global>
         </C32Global>
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/GraphSettings.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/cmsis.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/core.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/dfp.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/eic.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/evsys.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/nvmctrl.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/project.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/sercom0.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/sercom5.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/settings.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/stdio.yml">
+      </item>
+      <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/tc3.yml">
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/definitions.h">
         <C32>
@@ -1262,7 +1289,6 @@
         <property key="preprocessor-macros" value="SNSR_TYPE_BMI160=1"/>
         <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
-        <property key="tentative-definitions" value="-fno-common"/>
         <property key="toplevel-reordering" value=""/>
         <property key="unaligned-access" value=""/>
         <property key="use-cci" value="false"/>
@@ -1294,7 +1320,6 @@
       </C32-AS>
       <C32-CO>
         <property key="coverage-enable" value=""/>
-        <property key="stack-guidance" value="false"/>
       </C32-CO>
       <C32-LD>
         <property key="additional-options-use-response-files" value="false"/>
@@ -1367,7 +1392,7 @@
         <property key="use-indirect-calls" value="false"/>
       </C32CPP>
       <C32Global>
-        <property key="common-include-directories" value="..\bmi160;..\sensiml"/>
+        <property key="common-include-directories" value="../bmi160;../sensiml"/>
         <property key="gp-relative-option" value=""/>
         <property key="legacy-libc" value="false"/>
         <property key="mdtcm" value=""/>
@@ -1376,7 +1401,6 @@
         <property key="omit-pack-options" value="1"/>
         <property key="relaxed-math" value="false"/>
         <property key="save-temps" value="false"/>
-        <property key="stack-smashing" value=""/>
         <property key="wpo-lto" value="false"/>
       </C32Global>
       <PICkit3PlatformTool>
@@ -1722,14 +1746,17 @@
       </Simulator>
       <nEdbgTool>
         <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="arm.use_vtor" value="false"/>
+        <property key="arm.vtor_adr" value="exception_table"/>
         <property key="communication.activationmode" value="nohv"/>
         <property key="communication.interface" value="swd"/>
         <property key="communication.speed" value="2.000"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="true"/>
         <property key="firmware.path" value="Press to browse for a specific firmware version"/>
         <property key="firmware.toolpack" value="Press to select which tool pack to use"/>
         <property key="firmware.update.action" value="firmware.update.use.latest"/>
         <property key="freeze.timers" value="false"/>
+        <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
         <property key="memories.configurationmemory" value="true"/>
@@ -1753,9 +1780,14 @@
         <property key="programoptions.preserveprogramrange" value="false"/>
         <property key="programoptions.preserveuserid" value="false"/>
         <property key="programoptions.programuserotp" value="false"/>
+        <property key="script.has_reset" value="true"/>
+        <property key="script.log_level" value="1"/>
+        <property key="script.reset_delay" value="0"/>
+        <property key="script.show_output" value="false"/>
         <property key="toolpack.updateoptions" value="toolpack.updateoptions.uselatestoolpack"/>
         <property key="toolpack.updateoptions.packversion" value="Press to select which tool pack to use"/>
         <property key="voltagevalue" value=""/>
+        <property key="x.erase.clearprot" value="true"/>
       </nEdbgTool>
     </conf>
     <conf name="SAMD21_IOT_WG_ICM42688" type="2">
@@ -1881,212 +1913,30 @@
         </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/GraphSettings.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/cmsis.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/core.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/dfp.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/eic.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/evsys.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/nvmctrl.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/project.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/sercom1.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/sercom5.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/settings.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/stdio.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/tc3.yml">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-CO>
-        </C32-CO>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/definitions.h">
         <C32>
@@ -3075,7 +2925,6 @@
         <property key="preprocessor-macros" value="SNSR_TYPE_ICM42688=1;ICM42688"/>
         <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
-        <property key="tentative-definitions" value="-fno-common"/>
         <property key="toplevel-reordering" value=""/>
         <property key="unaligned-access" value=""/>
         <property key="use-cci" value="false"/>
@@ -3107,7 +2956,6 @@
       </C32-AS>
       <C32-CO>
         <property key="coverage-enable" value=""/>
-        <property key="stack-guidance" value="false"/>
       </C32-CO>
       <C32-LD>
         <property key="additional-options-use-response-files" value="false"/>
@@ -3180,7 +3028,7 @@
         <property key="use-indirect-calls" value="false"/>
       </C32CPP>
       <C32Global>
-        <property key="common-include-directories" value="..\Icm426xx;..\sensiml"/>
+        <property key="common-include-directories" value="../Icm426xx;../sensiml"/>
         <property key="gp-relative-option" value=""/>
         <property key="legacy-libc" value="false"/>
         <property key="mdtcm" value=""/>
@@ -3189,7 +3037,6 @@
         <property key="omit-pack-options" value="1"/>
         <property key="relaxed-math" value="false"/>
         <property key="save-temps" value="false"/>
-        <property key="stack-smashing" value=""/>
         <property key="wpo-lto" value="false"/>
       </C32Global>
       <PICkit3PlatformTool>
@@ -3533,45 +3380,10 @@
         <property key="warningmessagebreakoptions.displaywarningmessagesoption" value=""/>
         <property key="warningmessagebreakoptions.warningmessages" value="holdstate"/>
       </Simulator>
-      <Tool>
-        <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="communication.activationmode" value="nohv"/>
-        <property key="communication.interface" value="swd"/>
-        <property key="communication.speed" value="2.000"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.path" value="Press to browse for a specific firmware version"/>
-        <property key="firmware.toolpack" value="Press to select which tool pack to use"/>
-        <property key="firmware.update.action" value="firmware.update.use.latest"/>
-        <property key="freeze.timers" value="false"/>
-        <property key="memories.aux" value="false"/>
-        <property key="memories.bootflash" value="true"/>
-        <property key="memories.configurationmemory" value="true"/>
-        <property key="memories.configurationmemory2" value="true"/>
-        <property key="memories.dataflash" value="true"/>
-        <property key="memories.eeprom" value="true"/>
-        <property key="memories.exclude.configurationmemory" value="true"/>
-        <property key="memories.flashdata" value="true"/>
-        <property key="memories.id" value="true"/>
-        <property key="memories.instruction.ram.ranges" value="${memories.instruction.ram.ranges}"/>
-        <property key="memories.programmemory" value="true"/>
-        <property key="memories.programmemory.ranges" value="0-3ffff"/>
-        <property key="memories.rww" value="true"/>
-        <property key="poweroptions.powerenable" value="false"/>
-        <property key="programoptions.eraseb4program" value="true"/>
-        <property key="programoptions.preservedataflash" value="false"/>
-        <property key="programoptions.preservedataflash.ranges" value="${memories.dataflash.default}"/>
-        <property key="programoptions.preserveeeprom" value="false"/>
-        <property key="programoptions.preserveeeprom.ranges" value=""/>
-        <property key="programoptions.preserveprogram.ranges" value=""/>
-        <property key="programoptions.preserveprogramrange" value="false"/>
-        <property key="programoptions.preserveuserid" value="false"/>
-        <property key="programoptions.programuserotp" value="false"/>
-        <property key="toolpack.updateoptions" value="toolpack.updateoptions.uselatestoolpack"/>
-        <property key="toolpack.updateoptions.packversion" value="Press to select which tool pack to use"/>
-        <property key="voltagevalue" value=""/>
-      </Tool>
       <nEdbgTool>
         <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="arm.use_vtor" value="false"/>
+        <property key="arm.vtor_adr" value="exception_table"/>
         <property key="communication.activationmode" value="nohv"/>
         <property key="communication.interface" value="swd"/>
         <property key="communication.speed" value="2.000"/>
@@ -3580,6 +3392,7 @@
         <property key="firmware.toolpack" value="Press to select which tool pack to use"/>
         <property key="firmware.update.action" value="firmware.update.use.latest"/>
         <property key="freeze.timers" value="false"/>
+        <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
         <property key="memories.configurationmemory" value="true"/>
@@ -3603,9 +3416,14 @@
         <property key="programoptions.preserveprogramrange" value="false"/>
         <property key="programoptions.preserveuserid" value="false"/>
         <property key="programoptions.programuserotp" value="false"/>
+        <property key="script.has_reset" value="true"/>
+        <property key="script.log_level" value="1"/>
+        <property key="script.reset_delay" value="0"/>
+        <property key="script.show_output" value="false"/>
         <property key="toolpack.updateoptions" value="toolpack.updateoptions.uselatestoolpack"/>
         <property key="toolpack.updateoptions.packversion" value="Press to select which tool pack to use"/>
         <property key="voltagevalue" value=""/>
+        <property key="x.erase.clearprot" value="true"/>
       </nEdbgTool>
     </conf>
   </confs>

@@ -41,6 +41,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "sensor.h"
+#include "definitions.h"
 
 #if SNSR_SAMPLE_RATE_UNIT == SNSR_SAMPLE_RATE_UNIT_HZ
 #define __SNSRSAMPLERATEMACRO(x, y) ICM426XX_ ## x ## _CONFIG0_ODR_ ## y ## _ ## HZ

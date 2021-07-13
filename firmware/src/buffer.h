@@ -1,11 +1,11 @@
 /*******************************************************************************
-  Sensor Buffering Interface Source File
+  Sensor Buffering Interface Header File
 
   Company:
     Microchip Technology Inc.
 
   File Name:
-    buffer.c
+    buffer.h
 
   Summary:
     This file contains the ring buffer API used for buffering sensor data
@@ -20,10 +20,7 @@
     - The API provided here is strictly designed for a single reader thread and 
       single writer thread; other uses will cause race conditions.
     - It's further assumed that the reader will *never* interrupt the writer to 
-      call buffer_reset
-    - This API does not account for the possibility of out of order
-      execution - in such a case memory synchronization primitives must be 
-      introduced.
+      call buffer_reset - this will cause a race condition
  *******************************************************************************/
 
 /*******************************************************************************
@@ -73,6 +70,22 @@
 #error "SNSR_DATA_TYPE must be defined"
 #endif
 
+// Define the memory barrier directive to use
+// This directive ensures that all data memory operations complete *before* 
+// the updating of the read or write index
+#if defined(__arm__)
+    // Full compiler/memory barrier
+#   define __buffer_sync()        asm volatile ("dsb" ::: "memory")
+#elif defined(__GNUC__)
+    // This directive only ensures the *compiler* doesn't reorder data memory operations before 
+    // the updating of the read or write index
+    // - this is enough on platforms that don't do out of order execution
+#   define __buffer_sync()        asm volatile ("" ::: "memory")
+#else
+#   define __buffer_sync()        do {} while (0)
+#   warning "buffer.h:: No memory/compiler barrier defined; correct concurrent operation not guaranteed"
+#endif
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -86,12 +99,20 @@ typedef buffer_data_t buffer_frame_t[SNSR_NUM_AXES];
 // this makes loads and stores of the read/write index atomic
 // Otherwise, we'd have to get interrupt masking involved..
 #if defined(__AVR__)
-    typedef uint8_t buffer_size_t;
-#elif defined (__arm__)
-    typedef uint32_t buffer_size_t;
+// For AVR assume 8-bit
+#   if (SNSR_BUF_LEN > (1 << 8))
+#       error "currently, max buffer length is 256 for 8-bit AVR"
+#   endif
+typedef uint8_t buffer_size_t;
 #else
-#   warning "buffer.h:: Unsure about architecture, assuming 32-bit accesses are atomic"    
-    typedef uint32_t buffer_size_t;
+// For anything else assume 32-bit
+#   if ! defined (__arm__)    
+#       warning "buffer.h:: Unsure about architecture, assuming 32-bit accesses are atomic"    
+#   endif
+#   if (SNSR_BUF_LEN > (1 << 32))
+#       error "Max buffer size is 2^32"
+#   endif
+typedef uint32_t buffer_size_t;
 #endif
 
 struct sensor_buffer_t {
