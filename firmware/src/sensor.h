@@ -54,7 +54,8 @@
     #define SNSR_STATUS_OK INV_ERROR_SUCCESS
 #endif
 
-#define SNSR_COM_BUF_SIZE   1024
+// Buffer size in bytes for TX with IMU device
+#define SNSR_COM_BUF_SIZE   128
 
 #ifdef	__cplusplus
 extern "C" {
@@ -80,7 +81,7 @@ int sensor_init(struct sensor_device_t *sensor);
 
 int sensor_set_config(struct sensor_device_t *sensor);
 
-int sensor_read(struct sensor_device_t *sensor, struct sensor_buffer_t *buffer);
+int sensor_read(struct sensor_device_t *sensor, buffer_data_t *ptr);
 
 #ifdef	__cplusplus
 }

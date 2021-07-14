@@ -5,7 +5,7 @@ Company:
 Microchip Technology Inc.
 
 File Name:
-ringbuffer.c
+ringbuffer.h
 
 Summary:
 This file contains the ring buffer API used for generic buffering
@@ -45,21 +45,22 @@ Notes:
 #include <stddef.h>
 #include <stdint.h>
 
-// Define the compiler fence directive to use
+// Define the compiler/memory fence directive to use
 // This directive ensures that all data memory operations complete before
 // the updating of the read or write index
-// We assume this is running a simple processor which doesn't have out of order execution
-#if defined(__arm__)
-// Full compiler/memory barrier
-#define __ringbuffer_sync()        asm volatile ("dsb" ::: "memory")
-#elif defined(__GNUC__)
-// This directive only ensures the *compiler* doesn't reorder data memory operations before
-// the updating of the read or write index
-// - this is enough on platforms that don't do out of order execution
-#define __ringbuffer_sync()        asm volatile ("" ::: "memory")
+#if defined(__GNUC__)
+#   if defined(__arm__)
+    // Full compiler/memory barrier
+#   define __ringbuffer_sync()        __asm__ volatile ("dsb" ::: "memory")
+#   else
+    // This directive only ensures the *compiler* doesn't reorder data memory operations before
+    // the updating of the read or write index
+    // - this is enough on platforms that don't do out of order execution
+#   define __ringbuffer_sync()        __asm__ volatile ("" ::: "memory")
+#   endif //if defined(__arm__)
 #else
-#define __ringbuffer_sync()
-#warning "ringbuffer.h:: No memory barrier defined; thread safety not guaranteed"
+#   define __ringbuffer_sync()        do {} while (0)
+#   warning "ringbuffer.h:: No memory barrier defined; thread safety not guaranteed"
 #endif
 
 #ifdef	__cplusplus
@@ -70,9 +71,14 @@ extern "C" {
 // ringbuffer_size_t MUST be set to a type whose size is <= the data bus width
 // this makes loads and stores of the read/write index atomic
 // Otherwise, we'd have to get interrupt masking involved..
-#if defined(__AVR__)
+// AVR, PIC10/12/14/16/18
+#if defined(__AVR__) || defined(__XC8)
     typedef uint8_t ringbuffer_size_t;
-#elif defined (__arm__)
+// PIC24, dsPIC
+#elif defined(__dsPIC30__) || defined(__XC16)
+    typedef uint16_t ringbuffer_size_t;
+// SAM, PIC32C, PIC32M
+#elif defined (__arm__) || defined(__XC32)
     typedef uint32_t ringbuffer_size_t;
 #else
 #   warning "ringbuffer.h:: Unsure about architecture, assuming 32-bit accesses are atomic"

@@ -21,7 +21,6 @@
 #include "app_config.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include <inttypes.h>
 #include <stddef.h>
 #define SSI_JSON_CONFIG_VERSION    (2)     /* 2 => Use enhance SSI protocol, 1 => use original SSI protocol */
 #define SSI_SYNC_DATA              (0xFF)

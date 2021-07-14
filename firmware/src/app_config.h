@@ -152,8 +152,12 @@
 #define SNSR_NAME "icm42688"
 #endif
 
-// Some convenience macros
-#define __nop__()           do {} while (0)
+// *****************************************************************************
+// *****************************************************************************
+// Section: Platform generic macros for portability
+// *****************************************************************************
+// *****************************************************************************
+#define __nullop__()        do {} while (0)
 #define LED_BLUE_On         LED_BLUE_Clear
 #define LED_BLUE_Off        LED_BLUE_Set
 #define LED_GREEN_On        LED_GREEN_Clear
@@ -168,14 +172,27 @@
 #define LED_STATUS_Off      LED_YELLOW_Off
 #define LED_STATUS_Toggle   LED_YELLOW_Toggle
 
-// Macros for portability
-#define UART_IsRxReady  SERCOM5_USART_ReceiverIsReady
-#define UART_RXC_Enable() do { SERCOM5_REGS->USART_INT.SERCOM_INTENSET |= (uint8_t)(SERCOM_USART_INT_INTENSET_RXC_Msk); } while (0)
-#define UART_Handler    SERCOM5_Handler
+// Map CS pin for SPI
+// CS pin mapping already defined in Harmony
+//#define MIKRO_CS_Clear      MIKRO_CS_Clear
+//#define MIKRO_CS_Set        MIKRO_CS_Set
+
+// UART stubs
+#define UART_RX_DATA        SERCOM5_REGS->USART_INT.SERCOM_DATA
+#define UART_IsRxReady      SERCOM5_USART_ReceiverIsReady
+#define UART_RXC_Enable()   do { SERCOM5_REGS->USART_INT.SERCOM_INTENSET |= (uint8_t)(SERCOM_USART_INT_INTENSET_RXC_Msk); } while (0)
+
+// Device init / management
+//#define SYS_Initialize   SYS_Initialize
+//#define SYS_Tasks           SYS_Tasks
+
+// Sensor external interrupt
 #define MIKRO_INT_CallbackRegister(cb) EIC_CallbackRegister(EIC_PIN_12, cb, (uintptr_t) NULL)
-#define TC_TimerStart TC3_TimerStart
-#define TC_TimerGet TC3_Timer16bitCounterGet
-#define TC_TimerCallbackRegister(cb) TC3_TimerCallbackRegister(cb, (uintptr_t) NULL)
+
+// uS Timer
+#define TC_TimerStart                   TC3_TimerStart
+#define TC_TimerGet_us                  TC3_Timer16bitCounterGet
+#define TC_TimerCallbackRegister(cb)    TC3_TimerCallbackRegister(cb, (uintptr_t) NULL)
 
 #ifdef	__cplusplus
 extern "C" {

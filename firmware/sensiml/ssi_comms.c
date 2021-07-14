@@ -17,7 +17,6 @@
  *==========================================================*/
 #include "app_config.h"
 #include "ssi_comms.h"
-#include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -26,8 +25,8 @@
 /*
  * Some functions in here will be unused, depending on SSI version
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
+//#pragma GCC diagnostic push
+//#pragma GCC diagnostic ignored "-Wunused-function"
 
 volatile unsigned int myData[2]                         = { 3, 4 };
 static uint32_t       ssi_conn_seqnum[SSI_MAX_CHANNELS] = { 0 };
@@ -159,5 +158,5 @@ void ssiv1_publish_sensor_data(uint8_t* buffer, int size)
     }
     p_ssi_interface->ssi_write(buffer, size);
 }
-#pragma GCC diagnostic pop
+//#pragma GCC diagnostic pop
 

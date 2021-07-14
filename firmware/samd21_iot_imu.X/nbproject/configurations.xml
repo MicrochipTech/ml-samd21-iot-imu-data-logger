@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><configurationDescriptor version="65">
   <logicalFolder displayName="root" name="root" projectFiles="true">
     <logicalFolder displayName="Header Files" name="HeaderFiles" projectFiles="true">
+      <logicalFolder displayName="app_config" name="app_config" projectFiles="true">
+        <logicalFolder displayName="bmi160" name="bmi160" projectFiles="true">
+        </logicalFolder>
+        <logicalFolder displayName="icm42688" name="icm42688" projectFiles="true">
+        </logicalFolder>
+      </logicalFolder>
       <logicalFolder displayName="bmi160" name="bmi160" projectFiles="true">
         <itemPath>../bmi160/bmi160.h</itemPath>
         <itemPath>../bmi160/bmi160_defs.h</itemPath>
@@ -661,30 +667,212 @@
         </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/GraphSettings.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/cmsis.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/core.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/dfp.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/eic.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/evsys.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/nvmctrl.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/project.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/sercom0.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/sercom5.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/settings.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/stdio.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/SAMD21_IOT_WG_ICM42688.mhc/tc3.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_ICM42688/definitions.h">
         <C32>
@@ -1913,30 +2101,212 @@
         </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/GraphSettings.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/cmsis.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/core.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/dfp.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/eic.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/evsys.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/nvmctrl.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/project.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/sercom1.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/sercom5.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/settings.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/stdio.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/SAMD21_IOT_WG_BMI160.mhc/tc3.yml">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item ex="true" overriding="false" path="../src/config/SAMD21_IOT_WG_BMI160/definitions.h">
         <C32>

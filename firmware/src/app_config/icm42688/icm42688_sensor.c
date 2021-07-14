@@ -1,14 +1,14 @@
 /*******************************************************************************
-  Sensor Driver Interface Source File
+  ICM42688 Sensor Driver Interface Source File
 
   Company:
     Microchip Technology Inc.
 
   File Name:
-    sensor.c
+    icm42688_sensor.c
 
   Summary:
-    This file defines a simplified interface API for configuring the IMU sensor
+    This file implements the simplified sensor API for configuring the ICM42688 IMU sensor
 
   Description:
     None
@@ -41,8 +41,18 @@
 #include <stdint.h>
 #include <string.h>
 #include "sensor.h"
+// *****************************************************************************
+// *****************************************************************************
+// Section: Platform specific includes
+// *****************************************************************************
+// *****************************************************************************
 #include "definitions.h"
 
+// *****************************************************************************
+// *****************************************************************************
+// Section: Macros for setting sample rate and sensor range
+// *****************************************************************************
+// *****************************************************************************
 #if SNSR_SAMPLE_RATE_UNIT == SNSR_SAMPLE_RATE_UNIT_HZ
 #define __SNSRSAMPLERATEMACRO(x, y) ICM426XX_ ## x ## _CONFIG0_ODR_ ## y ## _ ## HZ
 #else
@@ -59,47 +69,12 @@
 #define _SNSRGYRORANGEEXPR(x) __SNSRGYRORANGEMACRO(x)
 #define _GET_IMU_GYRO_RANGE_MACRO() _SNSRGYRORANGEEXPR(SNSR_GYRO_RANGE)
 
-static struct sensor_buffer_t * l_snsr_buffer = NULL;
-
-uint64_t inv_icm426xx_get_time_us(void) {
-    return snsr_read_timer_us();
-}
-
-void inv_icm426xx_sleep_us(uint32_t us) {
-    snsr_sleep_us(us);
-}
-
-// Handle callback from inv_icm426xx_get_data_from_registers
-void icm42688_sensor_event_cb(inv_icm426xx_sensor_event_t * event) {
-    if (l_snsr_buffer == NULL) {
-        return;
-    }
-    
-    /* Convert sensor data to buffer type and write to buffer */
-    buffer_data_t data[1][SNSR_NUM_AXES];
-    buffer_data_t *ptr = &data[0][0];
-#if SNSR_USE_ACCEL_X
-    *ptr++ = (buffer_data_t) event->accel[0];
-#endif
-#if SNSR_USE_ACCEL_Y
-    *ptr++ = (buffer_data_t) event->accel[1];
-#endif
-#if SNSR_USE_ACCEL_Z
-    *ptr++ = (buffer_data_t) event->accel[2];
-#endif
-#if SNSR_USE_GYRO_X
-    *ptr++ = (buffer_data_t) event->gyro[0];
-#endif
-#if SNSR_USE_GYRO_Y
-    *ptr++ = (buffer_data_t) event->gyro[1];
-#endif
-#if SNSR_USE_GYRO_Z
-    *ptr++ = (buffer_data_t) event->gyro[2];
-#endif
-    buffer_write(l_snsr_buffer, data, 1);
-}
-
-int icm42688_spi_read (struct inv_icm426xx_serif * serif, uint8_t reg, uint8_t * rbuffer, uint32_t rlen) {
+// *****************************************************************************
+// *****************************************************************************
+// Section: Serial comms implementation
+// *****************************************************************************
+// *****************************************************************************
+static int icm42688_spi_read (struct inv_icm426xx_serif * serif, uint8_t reg, uint8_t * rbuffer, uint32_t rlen) {
     int rval = 0;
     
     reg = 0x80 | (reg & 0x7F); // Set Read/Write bit in MSB (1 for Read)
@@ -118,7 +93,7 @@ int icm42688_spi_read (struct inv_icm426xx_serif * serif, uint8_t reg, uint8_t *
     return rval;
 }
 
-int icm42688_spi_write (struct inv_icm426xx_serif * serif, uint8_t reg, const uint8_t * wbuffer, uint32_t wlen) {
+static int icm42688_spi_write (struct inv_icm426xx_serif * serif, uint8_t reg, const uint8_t * wbuffer, uint32_t wlen) {
     int rval = 0;
     uint8_t *ptr = (uint8_t *) wbuffer; // ignore const (we promise we won't change it)
     uint8_t data[2];
@@ -138,6 +113,48 @@ int icm42688_spi_write (struct inv_icm426xx_serif * serif, uint8_t reg, const ui
     
     MIKRO_CS_Set();
     return rval;
+}
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: Platform generic sensor implementation functions
+// *****************************************************************************
+// *****************************************************************************
+static buffer_data_t * l_snsr_buffer = NULL;
+
+uint64_t inv_icm426xx_get_time_us(void) {
+    return snsr_read_timer_us();
+}
+
+void inv_icm426xx_sleep_us(uint32_t us) {
+    snsr_sleep_us(us);
+}
+
+// Handle callback from inv_icm426xx_get_data_from_registers
+void icm42688_sensor_event_cb(inv_icm426xx_sensor_event_t * event) {
+    if (l_snsr_buffer == NULL) {
+        return;
+    }
+    
+    /* Convert sensor data to buffer type and write to buffer */
+#if SNSR_USE_ACCEL_X
+    *l_snsr_buffer++ = (buffer_data_t) event->accel[0];
+#endif
+#if SNSR_USE_ACCEL_Y
+    *l_snsr_buffer++ = (buffer_data_t) event->accel[1];
+#endif
+#if SNSR_USE_ACCEL_Z
+    *l_snsr_buffer++ = (buffer_data_t) event->accel[2];
+#endif
+#if SNSR_USE_GYRO_X
+    *l_snsr_buffer++ = (buffer_data_t) event->gyro[0];
+#endif
+#if SNSR_USE_GYRO_Y
+    *l_snsr_buffer++ = (buffer_data_t) event->gyro[1];
+#endif
+#if SNSR_USE_GYRO_Z
+    *l_snsr_buffer++ = (buffer_data_t) event->gyro[2];
+#endif
 }
 
 int icm42688_sensor_init(struct sensor_device_t *sensor) {    
@@ -184,8 +201,8 @@ int icm42688_sensor_set_config(struct sensor_device_t *sensor) {
     return sensor->status;
 }
 
-int icm42688_sensor_read(struct sensor_device_t *sensor, struct sensor_buffer_t *buffer) {    
-    l_snsr_buffer = buffer; // Set module scoped buffer pointer
+int icm42688_sensor_read(struct sensor_device_t *sensor, buffer_data_t *ptr) {
+    l_snsr_buffer = ptr; // Set module scoped buffer pointer
     sensor->status = inv_icm426xx_get_data_from_registers(&sensor->device);
     l_snsr_buffer = NULL;
     
