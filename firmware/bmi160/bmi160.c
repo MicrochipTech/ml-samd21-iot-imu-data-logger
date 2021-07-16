@@ -3097,7 +3097,10 @@ static int8_t null_ptr_check(const struct bmi160_dev *dev)
 {
     int8_t rslt;
 
-    if ((dev == NULL) || (dev->read == NULL) || (dev->write == NULL) || (dev->delay_ms == NULL))
+    if ((dev == NULL) 
+            || (((struct bmi160_dev *) dev)->read == NULL) 
+            || (((struct bmi160_dev *) dev)->write == NULL) 
+            || (((struct bmi160_dev *) dev)->delay_ms == NULL))
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -3596,8 +3599,8 @@ static int8_t get_accel_data(uint8_t len, struct bmi160_sensor_data *accel, cons
         if (len == 3)
         {
             time_0 = data_array[idx++];
-            time_1 = (uint16_t)(data_array[idx++] << 8);
-            time_2 = (uint32_t)(data_array[idx++] << 16);
+            time_1 = (uint16_t) data_array[idx++] << 8;
+            time_2 = (uint32_t) data_array[idx++] << 16;
             accel->sensortime = (uint32_t)(time_2 | time_1 | time_0);
         }
         else
@@ -3676,8 +3679,8 @@ static int8_t get_gyro_data(uint8_t len, struct bmi160_sensor_data *gyro, const 
             gyro->z = msblsb; /* gyro Z axis data */
             idx = idx + 6;
             time_0 = data_array[idx++];
-            time_1 = (uint16_t)(data_array[idx++] << 8);
-            time_2 = (uint32_t)(data_array[idx++] << 16);
+            time_1 = (uint16_t) data_array[idx++] << 8;
+            time_2 = (uint32_t) data_array[idx++] << 16;
             gyro->sensortime = (uint32_t)(time_2 | time_1 | time_0);
         }
         else
@@ -3743,8 +3746,8 @@ static int8_t get_accel_gyro_data(uint8_t len,
         if (len == 3)
         {
             time_0 = data_array[idx++];
-            time_1 = (uint16_t)(data_array[idx++] << 8);
-            time_2 = (uint32_t)(data_array[idx++] << 16);
+            time_1 = (uint16_t) data_array[idx++] << 8;
+            time_2 = (uint32_t) data_array[idx++] << 16;
             accel->sensortime = (uint32_t)(time_2 | time_1 | time_0);
             gyro->sensortime = (uint32_t)(time_2 | time_1 | time_0);
         }
@@ -6231,8 +6234,8 @@ static void unpack_sensortime_frame(uint16_t *data_index, const struct bmi160_de
     }
     else
     {
-        sensor_time_byte3 = dev->fifo->data[(*data_index) + BMI160_SENSOR_TIME_MSB_BYTE] << 16;
-        sensor_time_byte2 = dev->fifo->data[(*data_index) + BMI160_SENSOR_TIME_XLSB_BYTE] << 8;
+        sensor_time_byte3 = (uint32_t) dev->fifo->data[(*data_index) + BMI160_SENSOR_TIME_MSB_BYTE] << 16;
+        sensor_time_byte2 = (uint16_t) dev->fifo->data[(*data_index) + BMI160_SENSOR_TIME_XLSB_BYTE] << 8;
         sensor_time_byte1 = dev->fifo->data[(*data_index)];
 
         /* Sensor time */
@@ -6317,7 +6320,7 @@ static int8_t configure_offset_enable(const struct bmi160_foc_conf *foc_conf, st
 static int8_t trigger_foc(struct bmi160_offsets *offset, struct bmi160_dev const *dev)
 {
     int8_t rslt;
-    uint8_t foc_status;
+    uint8_t foc_status = 0;
     uint8_t cmd = BMI160_START_FOC_CMD;
     uint8_t timeout = 0;
     uint8_t data_array[20];

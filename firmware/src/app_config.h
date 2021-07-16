@@ -96,7 +96,7 @@
 #define SNSR_USE_GYRO_Z         true
 
 // Size of sensor buffer in samples (must be power of 2)
-#define SNSR_BUF_LEN            64
+#define SNSR_BUF_LEN            128
 
 // Type used to store and stream sensor samples
 #define SNSR_DATA_TYPE          int16_t
@@ -108,6 +108,8 @@
 #if (DATA_STREAMER_FORMAT == DATA_STREAMER_FORMAT_SMLSS)
 #define SML_MAX_CONFIG_STRLEN   256
 #define SNSR_SAMPLES_PER_PACKET 8 // must be factor of SNSR_BUF_LEN
+#define SSI_JSON_CONFIG_VERSION 2  // 2 => Use enhance SSI protocol,
+                                   // 1 => use original SSI protocol
 #else
 #define SNSR_SAMPLES_PER_PACKET 1
 #endif

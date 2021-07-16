@@ -155,9 +155,10 @@ int bmi160_sensor_init(struct sensor_device_t *sensor) {
     return sensor->status;
 }
 
-int bmi160_sensor_set_config(struct sensor_device_t *sensor) {
-    int8_t errcode = BMI160_OK;
-    
+int bmi160_sensor_set_config(struct sensor_device_t *sensor) {    
+    if (sensor->status != BMI160_OK)
+        return sensor->status;
+            
     /* Select the Output data rate, range of accelerometer sensor */
     sensor->device.accel_cfg.odr = _GET_IMU_SAMPLE_RATE_MACRO(ACCEL); //BMI160_ACCEL_ODR_100HZ;
     sensor->device.accel_cfg.range = _GET_IMU_ACCEL_RANGE_MACRO();//BMI160_ACCEL_RANGE_2G;
@@ -175,7 +176,21 @@ int bmi160_sensor_set_config(struct sensor_device_t *sensor) {
     sensor->device.gyro_cfg.power = BMI160_GYRO_NORMAL_MODE;
 
     /* Set the sensor configuration */
-    errcode = bmi160_set_sens_conf(&sensor->device);
+    if ((sensor->status = bmi160_set_sens_conf(&sensor->device)) != BMI160_OK)
+        return sensor->status;
+    
+//    /* Set up fast offset compensation */
+//    struct bmi160_foc_conf foc_conf;
+//    struct bmi160_offsets offsets;
+//    
+//    foc_conf.acc_off_en = BMI160_ENABLE;
+//    foc_conf.foc_acc_x  = BMI160_FOC_ACCEL_0G;
+//    foc_conf.foc_acc_y  = BMI160_FOC_ACCEL_0G;
+//    foc_conf.foc_acc_z  = BMI160_FOC_ACCEL_POSITIVE_G;
+//    foc_conf.gyro_off_en = BMI160_ENABLE;
+//    foc_conf.foc_gyr_en = BMI160_ENABLE;
+//
+//    sensor->status = bmi160_start_foc(&foc_conf, &offsets, &sensor->device);
     
     /* Configure sensor interrupt */
     struct bmi160_int_settg int_config;
@@ -195,7 +210,8 @@ int bmi160_sensor_set_config(struct sensor_device_t *sensor) {
     int_config.int_pin_settg.latch_dur = BMI160_LATCH_DUR_NONE;// non-latched output
             
     /* Set the data ready interrupt */
-    errcode |= bmi160_set_int_config(&int_config, &sensor->device);
+    if ((sensor->status = bmi160_set_int_config(&int_config, &sensor->device)) != BMI160_OK)
+        return sensor->status;
     
-    return errcode;
+    return sensor->status;
 }

@@ -54,7 +54,7 @@ int8_t ringbuffer_init(ringbuffer_t *ringbuffer, uint8_t *buffer, ringbuffer_siz
     ringbuffer->data = buffer;
     ringbuffer->_mask = len - 1;
 
-    return 1;
+    return 0;
 }
 
 // Only the reader should call this function, and ONLY if overrun has already occurred

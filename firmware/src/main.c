@@ -85,7 +85,7 @@ static size_t __attribute__(( unused )) UART_Read(uint8_t *ptr, const size_t nby
 }
 
 void Ticker_Callback() {
-    static unsigned int mstick = 0;
+    static uint32_t mstick = 0;
 
     ++tickcounter;
     if (tickrate == 0) {
@@ -130,6 +130,10 @@ void SNSR_ISR_HANDLER() {
     else {
         snsr_buffer.overrun = true;
     }
+}
+
+void Null_Handler() {
+    // Do nothing
 }
 
 #if STREAM_FORMAT_IS(SMLSS)
@@ -183,7 +187,7 @@ size_t ssi_build_json_config(char json_config_str[], size_t maxlen)
 
 int main ( void )
 {
-    int8_t app_failed;
+    int8_t app_failed = 0;
 #if STREAM_FORMAT_IS(SMLSS)
     uint32_t ssi_adtimer = 0;
     ssi_io_funcs_t ssi_io_s;
@@ -192,12 +196,12 @@ int main ( void )
     /* Initialize all modules */
     SYS_Initialize ( NULL );
     
-    /* Register and start the LED ticker */
+    /* Register and start the millisecond interrupt ticker */
     TC_TimerCallbackRegister(Ticker_Callback);
     TC_TimerStart();
     
-    /* Activate External Interrupt Controller for sensor capture */
-    MIKRO_INT_CallbackRegister(SNSR_ISR_HANDLER);
+    /* Initialize our data buffer */
+    buffer_init(&snsr_buffer);
     
     printf("\n");
     
@@ -205,14 +209,10 @@ int main ( void )
     app_failed = 1;
     while (1)
     {
-        /* Initialize our data buffer */
-        buffer_init(&snsr_buffer);
-
         /* Initialize the UART RX buffer */
-        if (!ringbuffer_init(&uartRxBuffer, _uartRxBuffer_data, sizeof(_uartRxBuffer_data)))
+        if (ringbuffer_init(&uartRxBuffer, _uartRxBuffer_data, sizeof(_uartRxBuffer_data)))
             break;
         
-        /* Enable UART RXC interrupt */
         UART_RXC_Enable();
 
         if (sensor_init(&sensor) != SNSR_STATUS_OK) {
@@ -224,6 +224,9 @@ int main ( void )
             printf("ERROR: sensor configuration result = %d\n", sensor.status);
             break;
         }
+        
+        /* Activate External Interrupt Controller for sensor capture */
+        MIKRO_INT_CallbackRegister(SNSR_ISR_HANDLER);
         
         printf("sensor type is %s\n", SNSR_NAME);
         printf("sensor sample rate set at %dHz\n", SNSR_SAMPLE_RATE_IN_HZ);
@@ -248,7 +251,9 @@ int main ( void )
 #endif
 
         /* STATE CHANGE - Application successfully initialized */
-        tickrate = 0; LED_STATUS_On();
+        tickrate = 0;
+        LED_ALL_Off(); 
+        LED_STATUS_On();
         
 #if STREAM_FORMAT_IS(SMLSS)
         /* STATE CHANGE - Application now waiting for connect */
@@ -257,10 +262,9 @@ int main ( void )
         tickrate = TICK_RATE_SLOW;
 #endif //STREAM_FORMAT_IS(SMLSS)        
         
-        buffer_reset(&snsr_buffer);
         app_failed = 0;
         break;
-    }
+    }  
     
     while (!app_failed)
     {
@@ -281,7 +285,9 @@ int main ( void )
                 tickrate = TICK_RATE_SLOW;
 
                 /* Reset the sensor buffer */
+                MIKRO_INT_CallbackRegister(Null_Handler);
                 buffer_reset(&snsr_buffer);
+                MIKRO_INT_CallbackRegister(SNSR_ISR_HANDLER);
             }
             if (read_timer_ms() - ssi_adtimer > 500) {
                 ssi_adtimer = read_timer_ms();
@@ -295,15 +301,17 @@ int main ( void )
             /* STATE CHANGE - buffer overflow */
             tickrate = 0;
             LED_ALL_Off();
-            LED_STATUS_On(); LED_RED_On();  // Indicate OVERFLOW
+            LED_STATUS_On(); LED_RED_On();
             sleep_ms(5000U);
             
             // Clear OVERFLOW
-            LED_ALL_Off();
-            buffer_reset(&snsr_buffer); 
+            MIKRO_INT_CallbackRegister(Null_Handler);
+            buffer_reset(&snsr_buffer);
+            MIKRO_INT_CallbackRegister(SNSR_ISR_HANDLER);
             
             /* STATE CHANGE - Application is streaming */
             tickrate = TICK_RATE_SLOW;
+            LED_ALL_Off();
             continue;
         }
 #if !STREAM_FORMAT_IS(NONE)
@@ -351,7 +359,9 @@ int main ( void )
             ssi_try_disconnect();
             if (!ssi_connected()) {
                 /* STATE CHANGE - Application now waiting for connect */
-                tickrate = 0; LED_STATUS_On();
+                tickrate = 0;
+                LED_ALL_Off();
+                LED_STATUS_On();
             }
         }
 #endif
@@ -359,7 +369,7 @@ int main ( void )
     }
         
     tickrate = 0;
-    LED_STATUS_Off();
+    LED_ALL_Off();
     LED_RED_On();
     
     return ( EXIT_FAILURE );
