@@ -79,6 +79,9 @@ static size_t __attribute__(( unused )) UART_Write(uint8_t *ptr, const size_t nb
 // Section: Generic stub definitions
 // *****************************************************************************
 // *****************************************************************************
+void Null_Handler() {
+    // Do nothing
+}
 
 static size_t __attribute__(( unused )) UART_Read(uint8_t *ptr, const size_t nbytes) {
     return ringbuffer_read(&uartRxBuffer, ptr, nbytes);
@@ -116,12 +119,12 @@ void sleep_us(uint32_t us) {
 }
 
 // For handling read of the sensor data
-void SNSR_ISR_HANDLER() {    
+void SNSR_ISR_HANDLER() {
     /* Check if any errors we've flagged have been acknowledged */
     if (sensor.status != SNSR_STATUS_OK) {
         return;
     }
-    
+
     buffer_data_t *ptr;
     if (buffer_get_write_buffer(&snsr_buffer, &ptr) \
             && (sensor.status = sensor_read(&sensor, ptr)) == SNSR_STATUS_OK) {
@@ -132,10 +135,6 @@ void SNSR_ISR_HANDLER() {
     }
 }
 
-void Null_Handler() {
-    // Do nothing
-}
-
 #if STREAM_FORMAT_IS(SMLSS)
 static char json_config_str[SML_MAX_CONFIG_STRLEN];
 
@@ -144,7 +143,7 @@ size_t ssi_build_json_config(char json_config_str[], size_t maxlen)
     size_t written=0;
     size_t snsr_index = 0;
 
-    written += snprintf(json_config_str, maxlen, 
+    written += snprintf(json_config_str, maxlen,
             "{\"version\":%d"
             ",\"sample_rate\":%d"
             ",\"samples_per_packet\":%d"
@@ -173,7 +172,7 @@ size_t ssi_build_json_config(char json_config_str[], size_t maxlen)
         written--;
     }
     snprintf(json_config_str+written, maxlen-written, "}}\n");
-    
+
     return written;
 }
 
@@ -192,19 +191,19 @@ int main ( void )
     uint32_t ssi_adtimer = 0;
     ssi_io_funcs_t ssi_io_s;
 #endif
-    
+
     /* Initialize all modules */
     SYS_Initialize ( NULL );
-    
+
     /* Register and start the millisecond interrupt ticker */
     TC_TimerCallbackRegister(Ticker_Callback);
     TC_TimerStart();
-    
+
     /* Initialize our data buffer */
     buffer_init(&snsr_buffer);
-    
+
     printf("\n");
-    
+
     /* Application init routine */
     app_failed = 1;
     while (1)
@@ -212,22 +211,25 @@ int main ( void )
         /* Initialize the UART RX buffer */
         if (ringbuffer_init(&uartRxBuffer, _uartRxBuffer_data, sizeof(_uartRxBuffer_data)))
             break;
-        
+
+        /* Discard any existing UART data */
+        while (UART_IsRxReady())
+            (void) UART_RX_DATA;
+
+        /* Enable the RX interrupt */
         UART_RXC_Enable();
 
+        /* Init and configure sensor */
         if (sensor_init(&sensor) != SNSR_STATUS_OK) {
             printf("ERROR: sensor init result = %d\n", sensor.status);
             break;
         }
-        
+
         if (sensor_set_config(&sensor) != SNSR_STATUS_OK) {
             printf("ERROR: sensor configuration result = %d\n", sensor.status);
             break;
         }
-        
-        /* Activate External Interrupt Controller for sensor capture */
-        MIKRO_INT_CallbackRegister(SNSR_ISR_HANDLER);
-        
+
         printf("sensor type is %s\n", SNSR_NAME);
         printf("sensor sample rate set at %dHz\n", SNSR_SAMPLE_RATE_IN_HZ);
 #if SNSR_USE_ACCEL
@@ -240,7 +242,7 @@ int main ( void )
 #else
         printf("gyrometer disabled\n");
 #endif
-        
+
 #if STREAM_FORMAT_IS(SMLSS)
         /* Init SensiML simple-stream interface */
         ssi_io_s.ssi_read = UART_Read;
@@ -250,27 +252,30 @@ int main ( void )
         ssi_build_json_config(json_config_str, SML_MAX_CONFIG_STRLEN);
 #endif
 
+        /* Activate External Interrupt Controller for sensor capture */
+        MIKRO_INT_CallbackRegister(SNSR_ISR_HANDLER);
+
         /* STATE CHANGE - Application successfully initialized */
         tickrate = 0;
-        LED_ALL_Off(); 
+        LED_ALL_Off();
         LED_STATUS_On();
-        
+
 #if STREAM_FORMAT_IS(SMLSS)
         /* STATE CHANGE - Application now waiting for connect */
 #elif !STREAM_FORMAT_IS(NONE)
         /* STATE CHANGE - Application is streaming */
         tickrate = TICK_RATE_SLOW;
-#endif //STREAM_FORMAT_IS(SMLSS)        
-        
+#endif //STREAM_FORMAT_IS(SMLSS)
+
         app_failed = 0;
         break;
-    }  
-    
+    }
+
     while (!app_failed)
     {
         /* Maintain state machines of all system modules. */
         SYS_Tasks ( );
-        
+
         if (sensor.status != SNSR_STATUS_OK) {
             printf("ERROR: Got a bad sensor status: %d\n", sensor.status);
             break;
@@ -279,6 +284,7 @@ int main ( void )
         else if (!ssi_connected()) {
             if (ringbuffer_get_read_bytes(&uartRxBuffer) >= CONNECT_CHARS) {
                 ssi_try_connect();
+                ringbuffer_advance_read_index(&uartRxBuffer, ringbuffer_get_read_bytes(&uartRxBuffer));
             }
             if (ssi_connected()) {
                 /* STATE CHANGE - Application is streaming */
@@ -294,28 +300,28 @@ int main ( void )
                 UART_Write((uint8_t *) json_config_str, strlen(json_config_str));
             }
         }
-#endif        
+#endif
         else if (snsr_buffer.overrun == true) {
             printf("\n\n\nOverrun!\n\n\n");
-            
+
             /* STATE CHANGE - buffer overflow */
             tickrate = 0;
             LED_ALL_Off();
             LED_STATUS_On(); LED_RED_On();
             sleep_ms(5000U);
-            
+
             // Clear OVERFLOW
             MIKRO_INT_CallbackRegister(Null_Handler);
             buffer_reset(&snsr_buffer);
             MIKRO_INT_CallbackRegister(SNSR_ISR_HANDLER);
-            
+
             /* STATE CHANGE - Application is streaming */
             tickrate = TICK_RATE_SLOW;
             LED_ALL_Off();
             continue;
         }
 #if !STREAM_FORMAT_IS(NONE)
-        else if(buffer_get_read_frames(&snsr_buffer) >= SNSR_SAMPLES_PER_PACKET) {            
+        else if(buffer_get_read_frames(&snsr_buffer) >= SNSR_SAMPLES_PER_PACKET) {
             buffer_data_t *ptr;
             size_t rdcnt = buffer_get_read_buffer(&snsr_buffer, &ptr);
             while (rdcnt >= SNSR_SAMPLES_PER_PACKET) {
@@ -343,20 +349,22 @@ int main ( void )
                 buffer_advance_read_index(&snsr_buffer, SNSR_SAMPLES_PER_PACKET);
             }
         }
-#else   /* Template code for processing sensor data */        
+#else   /* Template code for processing sensor data */
         else {
             buffer_data_t *ptr;
             size_t rdcnt = buffer_get_read_buffer(&snsr_buffer, &ptr);
             while (rdcnt--) {
-                // process sesnsor data
+                // process sensor data
+                ptr += SNSR_NUM_AXES;
                 buffer_advance_read_index(&snsr_buffer, 1);
             }
         }
 #endif //!STREAM_FORMAT_IS(NONE)
 
-#if STREAM_FORMAT_IS(SMLSS)        
+#if STREAM_FORMAT_IS(SMLSS)
         if (ssi_connected() && ringbuffer_get_read_bytes(&uartRxBuffer) >= DISCONNECT_CHARS) {
             ssi_try_disconnect();
+            ringbuffer_advance_read_index(&uartRxBuffer, ringbuffer_get_read_bytes(&uartRxBuffer));
             if (!ssi_connected()) {
                 /* STATE CHANGE - Application now waiting for connect */
                 tickrate = 0;
@@ -365,13 +373,13 @@ int main ( void )
             }
         }
 #endif
-        
+
     }
-        
+
     tickrate = 0;
     LED_ALL_Off();
     LED_RED_On();
-    
+
     return ( EXIT_FAILURE );
 }
 
@@ -379,4 +387,3 @@ int main ( void )
 /*******************************************************************************
  End of File
 */
-

@@ -73,8 +73,9 @@
 // For ICM42688 >= 1kHz range:
 //  - set SNSR_SAMPLE_RATE_UNIT to SNSR_SAMPLE_RATE_UNIT_KHZ
 //  - set SNSR_SAMPLE_RATE to one of: 1, 2, 4, 8, 16
-// !NB! Increasing the sample rate above 500Hz with all 6 axes may cause buffer overruns
-//      - Change at your own risk!
+// !NB! Increasing the sample rate above 500Hz (this may be lower for non MDV formats)
+// with all 6 axes may cause buffer overruns
+//  - Change at your own risk!
 #define SNSR_SAMPLE_RATE        100
 #define SNSR_SAMPLE_RATE_UNIT   SNSR_SAMPLE_RATE_UNIT_HZ // HZ or KHZ
 
@@ -107,7 +108,7 @@
 // SensiML specific parameters
 #if (DATA_STREAMER_FORMAT == DATA_STREAMER_FORMAT_SMLSS)
 #define SML_MAX_CONFIG_STRLEN   256
-#define SNSR_SAMPLES_PER_PACKET 8 // must be factor of SNSR_BUF_LEN
+#define SNSR_SAMPLES_PER_PACKET 8  // must be factor of SNSR_BUF_LEN
 #define SSI_JSON_CONFIG_VERSION 2  // 2 => Use enhance SSI protocol,
                                    // 1 => use original SSI protocol
 #else
@@ -162,12 +163,16 @@
 #define __nullop__()        do {} while (0)
 #define LED_BLUE_On         LED_BLUE_Clear
 #define LED_BLUE_Off        LED_BLUE_Set
+//#define LED_BLUE_Toggle     __nullop__
 #define LED_GREEN_On        LED_GREEN_Clear
 #define LED_GREEN_Off       LED_GREEN_Set
+//#define LED_GREEN_Toggle    __nullop__
 #define LED_RED_On          LED_RED_Clear
 #define LED_RED_Off         LED_RED_Set
+//#define LED_RED_Toggle      __nullop__
 #define LED_YELLOW_On       LED_YELLOW_Clear
 #define LED_YELLOW_Off      LED_YELLOW_Set
+//#define LED_YELLOW_Toggle   __nullop__
 #define LED_ALL_On()        do { LED_YELLOW_On(); LED_GREEN_On(); LED_RED_On(); LED_BLUE_On(); } while (0)
 #define LED_ALL_Off()       do { LED_YELLOW_Off(); LED_GREEN_Off(); LED_RED_Off(); LED_BLUE_Off(); } while (0)
 #define LED_STATUS_On       LED_YELLOW_On
@@ -175,18 +180,17 @@
 #define LED_STATUS_Toggle   LED_YELLOW_Toggle
 
 // Map CS pin for SPI
-// CS pin mapping already defined in Harmony
 //#define MIKRO_CS_Clear      MIKRO_CS_Clear
 //#define MIKRO_CS_Set        MIKRO_CS_Set
 
 // UART stubs
 #define UART_RX_DATA        SERCOM5_REGS->USART_INT.SERCOM_DATA
 #define UART_IsRxReady      SERCOM5_USART_ReceiverIsReady
-#define UART_RXC_Enable()   do { SERCOM5_REGS->USART_INT.SERCOM_INTENSET |= (uint8_t)(SERCOM_USART_INT_INTENSET_RXC_Msk); } while (0)
+#define UART_RXC_Enable()   { SERCOM5_REGS->USART_INT.SERCOM_INTENSET |= (uint8_t)(SERCOM_USART_INT_INTENSET_RXC_Msk); }
 
 // Device init / management
 //#define SYS_Initialize   SYS_Initialize
-//#define SYS_Tasks           SYS_Tasks
+//#define SYS_Tasks        SYS_Tasks
 
 // Sensor external interrupt
 #define MIKRO_INT_CallbackRegister(cb) EIC_CallbackRegister(EIC_PIN_12, cb, (uintptr_t) NULL)
