@@ -10,12 +10,10 @@
   Summary:
     This file contains the ring buffer API used for generic buffering
 
-  Description:
-
   Notes:
-
+    - The API provided here is strictly designed for a single reader thread and
+      single writer thread; other uses will cause race conditions.
  *******************************************************************************/
-
 /*******************************************************************************
 * Copyright (C) 2020 Microchip Technology Inc. and its subsidiaries.
 *
@@ -38,138 +36,146 @@
 * ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
 * THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
  *******************************************************************************/
-
-#include <stdbool.h>
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
 #include "ringbuffer.h"
 
-int8_t ringbuffer_init(ringbuffer_t *ringbuffer, uint8_t *buffer, ringbuffer_size_t len) {
-    // Check for power of 2
-    if ( ((len - 1) & len) != 0 )
-        return 0;
+/* Return non-zero on error */
+int8_t ringbuffer_init(ringbuffer_t *ringbuffer, void *buffer, ringbuffer_size_t len, size_t itemsize) {
+    /* Check for power of 2 */
+    if ( (((len - 1) & len) != 0) || (len > RINGBUFFER_MAX_SIZE) || (buffer == NULL) )
+        return 1;
 
-    memset(buffer, 0, sizeof(ringbuffer_t));
+    memset(ringbuffer, 0, sizeof(ringbuffer_t));
     ringbuffer->len = len;
+    ringbuffer->itemsize = itemsize;
     ringbuffer->data = buffer;
-    ringbuffer->_mask = len - 1;
+    ringbuffer->_mask = 2*len - 1;
 
     return 0;
 }
 
-// Only the reader should call this function, and ONLY if overrun has already occurred
-// Furthermore, reader should not be able to interrupt writer to call this function
+/* 
+* This function is not thread safe.
+* It should only be called when the program is in a state where the caller
+* thread cannot be interrupted by any other thread that could access the ring
+* buffer.
+*/
 void ringbuffer_reset(ringbuffer_t *ringbuffer) {
     ringbuffer->readIdx = 0;
     ringbuffer->writeIdx = 0;
 }
 
-ringbuffer_size_t ringbuffer_read(ringbuffer_t *ringbuffer, uint8_t *dst, ringbuffer_size_t bytecount) {
-    ringbuffer_size_t availbytes = ringbuffer_get_read_bytes(ringbuffer);
-    uint8_t *ptr;
-    ringbuffer_size_t rdcnt = ringbuffer_get_read_buffer(ringbuffer, &ptr);
-    bool underrun = bytecount > availbytes;
+ringbuffer_size_t ringbuffer_read(ringbuffer_t *ringbuffer, void *dst, ringbuffer_size_t itemcount) {
+    ringbuffer_size_t availitems = ringbuffer_get_read_items(ringbuffer);
+    ringbuffer_size_t buflen;
+    const void *src = ringbuffer_get_read_buffer(ringbuffer, &buflen);
 
-    if (underrun)
-        bytecount = availbytes;
+    if (itemcount > availitems)
+        itemcount = availitems;
 
-    if (rdcnt >= bytecount) {
-        memcpy(dst, ptr, bytecount);
+    if (buflen >= itemcount) {
+        memcpy(dst, src, itemcount * ringbuffer->itemsize);
     }
     else {
-        memcpy(dst, ptr, rdcnt);
-        memcpy(dst + rdcnt, ringbuffer->data, (bytecount - rdcnt));
+        memcpy(dst, src, buflen * ringbuffer->itemsize);
+        src = ringbuffer->data; /* wrap around buffer */
+        memcpy((uint8_t *) dst + buflen * ringbuffer->itemsize, src, (itemcount - buflen) * ringbuffer->itemsize);
     }
 
-    ringbuffer_advance_read_index(ringbuffer, bytecount);
-    return bytecount;
+    ringbuffer_advance_read_index(ringbuffer, itemcount);
+    return itemcount;
 }
 
-ringbuffer_size_t ringbuffer_write(ringbuffer_t *ringbuffer, uint8_t *src, ringbuffer_size_t bytecount) {
-    ringbuffer_size_t availbytes = ringbuffer_get_write_bytes(ringbuffer);
-    uint8_t *ptr;
-    ringbuffer_size_t wrcnt = ringbuffer_get_write_buffer(ringbuffer, &ptr);
-    bool overrun = bytecount > availbytes;
+ringbuffer_size_t ringbuffer_write(ringbuffer_t *ringbuffer, const void *src, ringbuffer_size_t itemcount) {
+    ringbuffer_size_t availitems = ringbuffer_get_write_items(ringbuffer);
+    ringbuffer_size_t buflen;
+    void *dst = ringbuffer_get_write_buffer(ringbuffer, &buflen);
 
-    if (overrun)
-        bytecount = availbytes;
-
-    if (wrcnt >= bytecount) {
-        memcpy(ptr, src, bytecount);
+    if (itemcount > availitems)
+        itemcount = availitems;
+    
+    if (buflen >= itemcount) {
+        memcpy(dst, src, itemcount * ringbuffer->itemsize);
     }
     else {
-        memcpy(ptr, src, wrcnt);
-        memcpy(ringbuffer->data, src + wrcnt, (bytecount - wrcnt));
+        memcpy(dst, src, buflen * ringbuffer->itemsize);
+        dst = ringbuffer->data; /* wrap around buffer */
+        memcpy(dst, (uint8_t *) src + buflen * ringbuffer->itemsize, (itemcount - buflen) * ringbuffer->itemsize);
     }
 
-    ringbuffer_advance_write_index(ringbuffer, bytecount);
-    return bytecount;
+    ringbuffer_advance_write_index(ringbuffer, itemcount);
+    return itemcount;
 }
 
-ringbuffer_size_t ringbuffer_get_read_bytes(ringbuffer_t *ringbuffer) {
+ringbuffer_size_t ringbuffer_get_read_items(ringbuffer_t *ringbuffer) {
     return (ringbuffer->writeIdx - ringbuffer->readIdx) & ringbuffer->_mask;
 }
 
-ringbuffer_size_t ringbuffer_get_write_bytes(ringbuffer_t *ringbuffer) {
-    return (ringbuffer->readIdx - ringbuffer->writeIdx - 1) & ringbuffer->_mask;
+ringbuffer_size_t ringbuffer_get_write_items(ringbuffer_t *ringbuffer) {
+    return ringbuffer->len - ((ringbuffer->writeIdx - ringbuffer->readIdx) & ringbuffer->_mask);
 }
 
-ringbuffer_size_t ringbuffer_get_read_buffer(ringbuffer_t *ringbuffer, uint8_t **ptr) {
+const void * ringbuffer_get_read_buffer(ringbuffer_t *ringbuffer, ringbuffer_size_t *itemcount) {
     ringbuffer_size_t writeIdx = ringbuffer->writeIdx;
     ringbuffer_size_t readIdx = ringbuffer->readIdx;
+    ringbuffer_size_t availitems = (writeIdx - readIdx) & ringbuffer->_mask;
 
-    *ptr = ringbuffer->data + readIdx;
-
-    if (writeIdx < readIdx) {
-        return ringbuffer->len - readIdx;
+    readIdx &= ringbuffer->len - 1; /* Shift readIdx to inside the buffer */
+    if (readIdx + availitems > ringbuffer->len) {
+        *itemcount = ringbuffer->len - readIdx;
     }
     else {
-        return writeIdx - readIdx;
+        *itemcount = availitems;
     }
+    
+    return (const void *) (ringbuffer->data + readIdx * ringbuffer->itemsize);
 }
 
-ringbuffer_size_t ringbuffer_get_write_buffer(ringbuffer_t *ringbuffer, uint8_t **ptr) {
+void * ringbuffer_get_write_buffer(ringbuffer_t *ringbuffer, ringbuffer_size_t *itemcount) {
     ringbuffer_size_t readIdx = ringbuffer->readIdx;
     ringbuffer_size_t writeIdx = ringbuffer->writeIdx;
+    ringbuffer_size_t availitems = ringbuffer->len - ((writeIdx - readIdx) & ringbuffer->_mask);
 
-    *ptr = ringbuffer->data + writeIdx;
-
-    if (readIdx <= writeIdx) {
-        return ringbuffer->len - writeIdx - (readIdx == 0);
+    writeIdx &= ringbuffer->len - 1; /* Shift writeIdx to inside the buffer */
+    if (writeIdx + availitems > ringbuffer->len) {
+        *itemcount = ringbuffer->len - writeIdx;
     }
     else {
-        return readIdx - writeIdx - 1;
+        *itemcount = availitems;
     }
+    
+    return (void *) (ringbuffer->data + writeIdx * ringbuffer->itemsize);
 }
 
-bool ringbuffer_advance_read_index(ringbuffer_t *ringbuffer, ringbuffer_size_t bytecount) {
+ringbuffer_size_t ringbuffer_advance_read_index(ringbuffer_t *ringbuffer, ringbuffer_size_t itemcount) {
     ringbuffer_size_t readIdx = ringbuffer->readIdx;
-    ringbuffer_size_t availbytes = (ringbuffer->writeIdx - readIdx) & ringbuffer->_mask;
+    ringbuffer_size_t availitems = (ringbuffer->writeIdx - readIdx) & ringbuffer->_mask;
     ringbuffer_size_t newIdx;
+    
+    if (itemcount > availitems)
+        itemcount = availitems;
 
-    // Note we advance the read index like the user asks regardless of underrun
-    newIdx = (readIdx + bytecount) & ringbuffer->_mask;
+    newIdx = (readIdx + itemcount) & ringbuffer->_mask;
 
     __ringbuffer_sync();
     ringbuffer->readIdx = newIdx;
-
-    return availbytes >= bytecount;
+    
+    return itemcount;
 }
 
-bool ringbuffer_advance_write_index(ringbuffer_t *ringbuffer, ringbuffer_size_t nbytes) {
+ringbuffer_size_t ringbuffer_advance_write_index(ringbuffer_t *ringbuffer, ringbuffer_size_t itemcount) {
     ringbuffer_size_t writeIdx = ringbuffer->writeIdx;
-    ringbuffer_size_t availbytes = (ringbuffer->readIdx - writeIdx - 1) & ringbuffer->_mask;
+    ringbuffer_size_t availitems = ringbuffer->len - ((writeIdx - ringbuffer->readIdx) & ringbuffer->_mask);
     ringbuffer_size_t newIdx;
 
-    // Note we advance the write index like the user asks regardless of overrun
-    newIdx = (writeIdx + nbytes) & ringbuffer->_mask;
+    if (itemcount > availitems)
+        itemcount = availitems;
+    
+    newIdx = (writeIdx + itemcount) & ringbuffer->_mask;
 
-    // Additionally, must make sure to flush any unfinished reads of writeIdx since
-    // it may take more than one cycle to access
     __ringbuffer_sync();
     ringbuffer->writeIdx = newIdx;
 
-    /* Flag overrun condition */
-    /* (Note for simplicity this declares overrun 1 byte before overrun actually occurs) */
-    return availbytes >= nbytes;
+    return itemcount;
 }

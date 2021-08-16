@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include "sensor_config.h"
-#include "buffer.h"
 #if SNSR_TYPE_BMI160
     #include "bmi160.h"
 #elif SNSR_TYPE_ICM42688
@@ -81,7 +80,7 @@ int sensor_init(struct sensor_device_t *sensor);
 
 int sensor_set_config(struct sensor_device_t *sensor);
 
-int sensor_read(struct sensor_device_t *sensor, buffer_data_t *ptr);
+int sensor_read(struct sensor_device_t *sensor, snsr_data_t *ptr);
 
 #ifdef	__cplusplus
 }

@@ -14,7 +14,6 @@ Notes:
     - The API provided here is strictly designed for a single reader thread and
       single writer thread; other uses will cause race conditions.
  *******************************************************************************/
-
 /*******************************************************************************
 * Copyright (C) 2020 Microchip Technology Inc. and its subsidiaries.
 *
@@ -37,81 +36,120 @@ Notes:
 * ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
 * THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
  *******************************************************************************/
-
 #ifndef RINGBUFFER_H
 #define	RINGBUFFER_H
-
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
-// Define the compiler/memory fence directive to use
-// This directive ensures that all data memory operations complete before
-// the updating of the read or write index
+/*
+* Define the compiler/memory fence directive to use. This directive ensures that
+* all data memory operations complete before the updating of the read or write
+* index
+*/
 #if defined(__GNUC__)
 #   if defined(__arm__)
-    // Full compiler/memory barrier
+    /* Full compiler/memory barrier */
 #   define __ringbuffer_sync()        __asm__ volatile ("dsb" ::: "memory")
 #   else
-    // This directive only ensures the *compiler* doesn't reorder data memory operations before
-    // the updating of the read or write index
-    // - this is enough on platforms that don't do out of order execution
+/*
+* This directive only ensures the *compiler* doesn't reorder data memory
+* operations before the updating of the read or write index this is enough on
+* platforms that don't do out of order execution
+*/
 #   define __ringbuffer_sync()        __asm__ volatile ("" ::: "memory")
-#   endif //if defined(__arm__)
+#   endif /* if defined(__arm__) */
 #else
+#   pragma message("ringbuffer.h:: No memory barrier defined; thread safety not guaranteed")
 #   define __ringbuffer_sync()        do {} while (0)
-#   warning "ringbuffer.h:: No memory barrier defined; thread safety not guaranteed"
-#endif
+#endif /* if defined(__GNUC__) */
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-// !!!NB!!!
-// ringbuffer_size_t MUST be set to a type whose size is <= the data bus width
-// this makes loads and stores of the read/write index atomic
-// Otherwise, we'd have to get interrupt masking involved..
-// AVR, PIC10/12/14/16/18
+/*
+* Define the ringbuffer size_t
+*
+* !NOTE!
+* - the types size limits the maximum number of items the buffer can hold
+* - this type is ***assumed to be a size that can be read/written by the CPU
+*   atomically***
+* - if the type is not atomically accessible, you'll have to enforce your own
+*   synchronization mechanisms
+*/
 #if defined(__AVR__) || defined(__XC8)
-    typedef uint8_t ringbuffer_size_t;
-// PIC24, dsPIC
+/* AVR, PIC10/12/14/16/18 */
+typedef uint8_t ringbuffer_size_t;
 #elif defined(__dsPIC30__) || defined(__XC16)
-    typedef uint16_t ringbuffer_size_t;
-// SAM, PIC32C, PIC32M
+/* PIC24, dsPIC */
+typedef uint16_t ringbuffer_size_t;
 #elif defined (__arm__) || defined(__XC32)
-    typedef uint32_t ringbuffer_size_t;
+/* SAM, PIC32C, PIC32M */
+typedef uint32_t ringbuffer_size_t;
 #else
-#   warning "ringbuffer.h:: Unsure about architecture, assuming 32-bit accesses are atomic"
-    typedef uint32_t ringbuffer_size_t;
+#pragma message("ringbuffer.h:: Unsure about architecture, assuming 32-bit accesses are atomic")
+typedef uint32_t ringbuffer_size_t;
 #endif
+
+/* !NOTE!
+* Due to implementation, we can only accept buffer sizes up to half of the max
+* value that ringbuffer_size_t can represent
+*/
+#define RINGBUFFER_MAX_SIZE ((((ringbuffer_size_t) ~((ringbuffer_size_t) 0)) >> 1) + 1)
 
 typedef struct ring_buffer {
     volatile ringbuffer_size_t writeIdx;
     volatile ringbuffer_size_t readIdx;
     ringbuffer_size_t len;
+    size_t itemsize;
     ringbuffer_size_t _mask;
     uint8_t *data;
 } ringbuffer_t;
 
-int8_t ringbuffer_init(ringbuffer_t *ringbuffer, uint8_t *buffer, ringbuffer_size_t len);
+/* Return non-zero on error */
+int8_t ringbuffer_init(ringbuffer_t *ringbuffer, void *buffer, ringbuffer_size_t len, size_t itemsize);
 
+/* 
+* This function is not thread safe.
+* It should only be called when the program is in a state where the caller
+* thread cannot be interrupted by any other thread that could access the ring
+* buffer.
+*/
 void ringbuffer_reset(ringbuffer_t *ringbuffer);
 
-ringbuffer_size_t ringbuffer_read(ringbuffer_t *ringbuffer, uint8_t *dst, ringbuffer_size_t nbytes);
+/* Copy items from ringbuffer into another buffer */
+ringbuffer_size_t ringbuffer_read(ringbuffer_t *ringbuffer, void *dst, ringbuffer_size_t itemcount);
 
-ringbuffer_size_t ringbuffer_write(ringbuffer_t *ringbuffer, uint8_t *src, ringbuffer_size_t nbytes);
+/* Copy items from buffer into ringbuffer */
+ringbuffer_size_t ringbuffer_write(ringbuffer_t *ringbuffer, const void *src, ringbuffer_size_t itemcount);
 
-ringbuffer_size_t ringbuffer_get_read_bytes(ringbuffer_t *ringbuffer);
+/* Get number of items available for reading */
+ringbuffer_size_t ringbuffer_get_read_items(ringbuffer_t *ringbuffer);
 
-ringbuffer_size_t ringbuffer_get_write_bytes(ringbuffer_t *ringbuffer);
+/* Get number of items available for writing */
+ringbuffer_size_t ringbuffer_get_write_items(ringbuffer_t *ringbuffer);
 
-ringbuffer_size_t ringbuffer_get_read_buffer(ringbuffer_t *ringbuffer, uint8_t **ptr);
+/* Get a pointer to a contiguous region starting at the oldest available read item; 
+ * itemcount will return the size of the region in terms of number of items 
+ * Note:
+ * Call advance_read_index and call this again to get the next contiguous region
+ */
+const void * ringbuffer_get_read_buffer(ringbuffer_t *ringbuffer, ringbuffer_size_t *itemcount);
 
-ringbuffer_size_t ringbuffer_get_write_buffer(ringbuffer_t *ringbuffer, uint8_t **ptr);
+/* Get a pointer to a contiguously writable region; 
+ * itemcount will return the size of the region in terms of number of items 
+ * Note:
+ * Call advance_write_index and call this again to get the next contiguous region
+ */
+void * ringbuffer_get_write_buffer(ringbuffer_t *ringbuffer, ringbuffer_size_t *itemcount);
 
-bool ringbuffer_advance_write_index(ringbuffer_t *ringbuffer, ringbuffer_size_t nbytes);
+/* Advance the index to indicate new items are available for reading
+ * Returns number of indices actually advanced (less than itemcount when overrun is encountered) */
+ringbuffer_size_t ringbuffer_advance_write_index(ringbuffer_t *ringbuffer, ringbuffer_size_t itemcount);
 
-bool ringbuffer_advance_read_index(ringbuffer_t *ringbuffer, ringbuffer_size_t nbytes);
+/* Advance the index to indicate space is available for writing
+*  Returns number of indices actually advanced (less than itemcount when underrun is encountered) */
+ringbuffer_size_t ringbuffer_advance_read_index(ringbuffer_t *ringbuffer, ringbuffer_size_t itemcount);
 
 #ifdef	__cplusplus
 }

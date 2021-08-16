@@ -204,6 +204,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef SNSR_DATA_TYPE snsr_data_t;
+typedef SNSR_DATA_TYPE snsr_dataframe_t[SNSR_NUM_AXES];
+typedef SNSR_DATA_TYPE snsr_datapacket_t[SNSR_NUM_AXES*SNSR_SAMPLES_PER_PACKET];
+
 #ifdef	__cplusplus
 }
 #endif /* __cplusplus */

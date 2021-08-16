@@ -106,7 +106,7 @@ static int8_t bmi160_i2c_write (uint8_t dev_addr, uint8_t reg_addr, uint8_t *dat
 // Section: Platform generic sensor implementation functions
 // *****************************************************************************
 // *****************************************************************************
-int bmi160_sensor_read(struct sensor_device_t *sensor, buffer_data_t *ptr)
+int bmi160_sensor_read(struct sensor_device_t *sensor, snsr_data_t *ptr)
 {
     /* Read bmi160 sensor data */
     struct bmi160_sensor_data accel;
@@ -119,22 +119,22 @@ int bmi160_sensor_read(struct sensor_device_t *sensor, buffer_data_t *ptr)
     
     /* Convert sensor data to buffer type and write to buffer */
 #if SNSR_USE_ACCEL_X
-    *ptr++ = (buffer_data_t) accel.x;
+    *ptr++ = (snsr_data_t) accel.x;
 #endif
 #if SNSR_USE_ACCEL_Y
-    *ptr++ = (buffer_data_t) accel.y;
+    *ptr++ = (snsr_data_t) accel.y;
 #endif
 #if SNSR_USE_ACCEL_Z
-    *ptr++ = (buffer_data_t) accel.z;
+    *ptr++ = (snsr_data_t) accel.z;
 #endif
 #if SNSR_USE_GYRO_X
-    *ptr++ = (buffer_data_t) gyro.x;
+    *ptr++ = (snsr_data_t) gyro.x;
 #endif
 #if SNSR_USE_GYRO_Y
-    *ptr++ = (buffer_data_t) gyro.y;
+    *ptr++ = (snsr_data_t) gyro.y;
 #endif
 #if SNSR_USE_GYRO_Z
-    *ptr++ = (buffer_data_t) gyro.z;
+    *ptr++ = (snsr_data_t) gyro.z;
 #endif
     
     return status;

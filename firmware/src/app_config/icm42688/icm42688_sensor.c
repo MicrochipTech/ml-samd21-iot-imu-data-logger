@@ -120,7 +120,7 @@ static int icm42688_spi_write (struct inv_icm426xx_serif * serif, uint8_t reg, c
 // Section: Platform generic sensor implementation functions
 // *****************************************************************************
 // *****************************************************************************
-static buffer_data_t * l_snsr_buffer = NULL;
+static snsr_data_t * l_snsr_buffer = NULL;
 
 uint64_t inv_icm426xx_get_time_us(void) {
     return snsr_read_timer_us();
@@ -138,22 +138,22 @@ void icm42688_sensor_event_cb(inv_icm426xx_sensor_event_t * event) {
     
     /* Convert sensor data to buffer type and write to buffer */
 #if SNSR_USE_ACCEL_X
-    *l_snsr_buffer++ = (buffer_data_t) event->accel[0];
+    *l_snsr_buffer++ = (snsr_data_t) event->accel[0];
 #endif
 #if SNSR_USE_ACCEL_Y
-    *l_snsr_buffer++ = (buffer_data_t) event->accel[1];
+    *l_snsr_buffer++ = (snsr_data_t) event->accel[1];
 #endif
 #if SNSR_USE_ACCEL_Z
-    *l_snsr_buffer++ = (buffer_data_t) event->accel[2];
+    *l_snsr_buffer++ = (snsr_data_t) event->accel[2];
 #endif
 #if SNSR_USE_GYRO_X
-    *l_snsr_buffer++ = (buffer_data_t) event->gyro[0];
+    *l_snsr_buffer++ = (snsr_data_t) event->gyro[0];
 #endif
 #if SNSR_USE_GYRO_Y
-    *l_snsr_buffer++ = (buffer_data_t) event->gyro[1];
+    *l_snsr_buffer++ = (snsr_data_t) event->gyro[1];
 #endif
 #if SNSR_USE_GYRO_Z
-    *l_snsr_buffer++ = (buffer_data_t) event->gyro[2];
+    *l_snsr_buffer++ = (snsr_data_t) event->gyro[2];
 #endif
 }
 
@@ -201,7 +201,7 @@ int icm42688_sensor_set_config(struct sensor_device_t *sensor) {
     return sensor->status;
 }
 
-int icm42688_sensor_read(struct sensor_device_t *sensor, buffer_data_t *ptr) {
+int icm42688_sensor_read(struct sensor_device_t *sensor, snsr_data_t *ptr) {
     l_snsr_buffer = ptr; // Set module scoped buffer pointer
     sensor->status = inv_icm426xx_get_data_from_registers(&sensor->device);
     l_snsr_buffer = NULL;
