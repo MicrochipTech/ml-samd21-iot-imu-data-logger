@@ -65,7 +65,7 @@ In addition, the onboard LEDs will indicate errors occurring in the firmware as 
 | Buffer Overflow |	Yellow (DATA) and Red (ERROR) LED lit for 5 seconds	| Processing is not able to keep up with real-time; data buffer has been reset. |
 
 # Usage with the MPLAB Data Visualizer and Machine Learning Plugins
-This project can be used to generate firmware for streaming data to the [MPLAB Data Visualizer plugin](https://www.microchip.com/en-us/development-tools-tools-and-software/embedded-software-center/mplab-data-visualizer) by setting the `DATA_STREAMER_FORMAT` macro as described above. Once the firmware is flashed, follow the steps below to set up Data Visualizer.
+This project can be used to generate firmware for streaming data to the [MPLAB Data Visualizer plugin](https://www.microchip.com/en-us/development-tools-tools-and-software/embedded-software-center/mplab-data-visualizer) by setting the `DATA_STREAMER_FORMAT` macro to `DATA_STREAMER_FORMAT_MDV` as described above. Once the firmware is flashed, follow the steps below to set up Data Visualizer.
 
 1. Connect the SAMD21 board to your computer, open up MPLAB X, and open the Data Visualizer plugin.
 2. Click the *Load Workspace* button as highlighted in the image below. Select one of the workspace files included in this repository - located under the `mplab-dv-workspaces` folder - whose name most closely describes your sensor configuration; you can always modify the configuration once it is loaded if needed.
@@ -99,3 +99,52 @@ The IMU data should now be available in the time plot. Double click anywhere wit
 | *Data Visualizer Time Plot* |
 
 Visit the [Machine Learning Plugin page](https://microchipdeveloper.com/machine-learning:ml-plugin) to learn more about using the Data Visualizer plugin to export your data for machine learning applications.
+
+# Usage with the SensiML Data Capture Lab
+This project can be used to generate firmware for streaming data to the [SensiML Data Capture Lab](https://sensiml.com/products/data-capture-lab/) (DCL) using the Simple Streaming Interface (SSI) format by setting the `DATA_STREAMER_FORMAT` macro to `DATA_STREAMER_FORMAT_SMLSS` as described above. Once the firmware is flashed, follow the steps below to set up direct streaming to DCL.
+
+1. Open up DCL and open your existing project or create a new one.
+
+2. Switch to *Capture* mode by clicking the *Switch Modes* button.
+
+| ![time plot](assets/dcl-switch-mode.png) |
+| :--: |
+| *Switch to Capture Mode* |
+
+3. In capture mode, click the *Setup Sensor Configuration* in the upper right quadrant of the DCL window.
+
+| ![](assets/dcl-setup-sensor.png) |
+| :--: |
+| *Setup a New Sensor* |
+
+4. In the *Select a Device Plugin* window select the SAMD21 ML Eval Kit item and click Next.
+
+| ![](assets/sensor-cfg-1.png) |
+| :--: |
+| *Select Device* |
+
+5. After selecting the device plugin, the *Plugin Details* page will appear; skip this by clicking *Next* to move forward to the *Sensor Properties* page. On the properties page, fill out the fields according to how your device is configured in the `app_config.h` firmware configuration file, then click Next.
+
+| ![](assets/sensor-cfg-2.png) |
+| :--: |
+| *Sensor Configuration* |
+
+6. Give a name to the sensor configuration in the *Save Sensor Configuration* window. If you plan on trying different configurations for your application, it's a good idea to include a summary of the sensor configuration in the name, for example, `bmi160-100hz-16g-2000dps`. Click *Save* to save the sensor configuration to your project.
+
+| ![](assets/sensor-cfg-3.png) |
+| :--: |
+| *Save Sensor Configuration* |
+
+7. Back in the main DCL window, select *Serial Port* from the *Connection Method* dropdown in the *Sensor Configuration* section of the window, then click the *Find Devices* button. 
+
+| ![](assets/sensor-connect-1.png) |
+| :--: |
+| *Find Devices* |
+
+8. In the *Find a Device* window click the *Scan* button to list connected devices. Select the SAMD21 ML Eval Kit and click *Connect*.
+
+| ![](assets/sensor-connect-2.png) |
+| :--: |
+| *Scan Connected Devices* |
+
+The SAMD21 ML Eval Kit should now be streaming to the DCL. Check out SensiML's [documentation](https://sensiml.com/documentation/) to learn more about how to use the DCL for capturing and annotating data.
