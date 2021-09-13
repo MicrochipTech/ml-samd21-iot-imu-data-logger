@@ -214,10 +214,6 @@ int main ( void )
         if (ringbuffer_init(&uartRxBuffer, _uartRxBuffer_data, sizeof(_uartRxBuffer_data) / sizeof(_uartRxBuffer_data[0]), sizeof(_uartRxBuffer_data[0])))
             break;
 
-        /* Discard any existing UART data */
-        while (UART_IsRxReady())
-            (void) UART_RX_DATA;
-
         /* Enable the RX interrupt */
         UART_RXC_Enable();
 

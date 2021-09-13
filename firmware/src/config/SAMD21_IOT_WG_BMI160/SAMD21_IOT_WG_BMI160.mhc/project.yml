@@ -62,13 +62,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: E85A8757F82A322C86C52D9BF238E9E1
-- generatedChecksum: 1DD87D0BF00E14818B6D0B55EB98DC9A
+- generatedChecksum: 76A1252513CD83E2BB238161E27B8C57
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/port
   name: plib_port.c
   physicalPath: peripheral/port
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 1DD87D0BF00E14818B6D0B55EB98DC9A
+  userChecksum: 76A1252513CD83E2BB238161E27B8C57
 - generatedChecksum: ACA71599E8685D8BB3066249F0BF69DA
   logicalPath: config/SAMD21_IOT_WG_BMI160/peripheral/sercom/i2c_master
   name: plib_sercom1_i2c_master.c

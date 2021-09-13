@@ -1178,6 +1178,13 @@ children:
       - type: User
         attributes: {value: D}
   - type: String
+    attributes: {id: PIN_48_DIR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: ''}
+  - type: String
     attributes: {id: PIN_48_FUNCTION_NAME}
     children:
     - type: Values
@@ -1192,6 +1199,20 @@ children:
       - type: User
         attributes: {value: SERCOM5_PAD1}
   - type: String
+    attributes: {id: PIN_48_INEN}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: ''}
+  - type: String
+    attributes: {id: PIN_48_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
+  - type: String
     attributes: {id: PIN_48_MODE}
     children:
     - type: Values
@@ -1205,6 +1226,13 @@ children:
       children:
       - type: User
         attributes: {value: D}
+  - type: String
+    attributes: {id: PIN_48_PULLEN}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: 'True'}
   - type: String
     attributes: {id: PIN_8_PERIPHERAL_FUNCTION}
     children:
@@ -1547,7 +1575,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '0x0'}
+        attributes: {id: core, value: '0x8'}
   - type: String
     attributes: {id: PORT_GROUP_1_PAD_2}
     children:
@@ -1582,7 +1610,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '0x1'}
+        attributes: {id: core, value: '0x5'}
   - type: String
     attributes: {id: PORT_GROUP_1_PINCFG9}
     children:
