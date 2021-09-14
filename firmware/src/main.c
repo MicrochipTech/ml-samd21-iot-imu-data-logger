@@ -149,7 +149,7 @@ size_t ssi_build_json_config(char json_config_str[], size_t maxlen)
             ",\"sample_rate\":%d"
             ",\"samples_per_packet\":%d"
             ",\"column_location\":{"
-            , SSI_JSON_CONFIG_VERSION, SNSR_SAMPLE_RATE_IN_HZ, SNSR_SAMPLES_PER_PACKET);
+            , SSI_JSON_CONFIG_VERSION, SNSR_SAMPLE_RATE, SNSR_SAMPLES_PER_PACKET);
 #if SNSR_USE_ACCEL_X
     written += snprintf(json_config_str+written, maxlen-written, "\"AccelerometerX\":%d,", snsr_index++);
 #endif
@@ -229,7 +229,7 @@ int main ( void )
         }
 
         printf("sensor type is %s\n", SNSR_NAME);
-        printf("sensor sample rate set at %dHz\n", SNSR_SAMPLE_RATE_IN_HZ);
+        printf("sensor sample rate set at %dHz\n", SNSR_SAMPLE_RATE);
 #if SNSR_USE_ACCEL
         printf("accelerometer axes %s%s%s enabled with range set at +/-%dGs\n", SNSR_USE_ACCEL_X ? "x" : "", SNSR_USE_ACCEL_Y ? "y" : "", SNSR_USE_ACCEL_Z ? "z" : "", SNSR_ACCEL_RANGE);
 #else
@@ -380,6 +380,9 @@ int main ( void )
     tickrate = 0;
     LED_ALL_Off();
     LED_RED_On();
+    
+    /* Loop forever on error */
+    while (1) {};
 
     return ( EXIT_FAILURE );
 }

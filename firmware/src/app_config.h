@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "sensor_config.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -65,19 +64,13 @@
 
 // IMU sampling rate in units of SNSR_SAMPLE_RATE_UNIT
 // For BMI160:
-//  - set SNSR_SAMPLE_RATE_UNIT to SNSR_SAMPLE_RATE_UNIT_HZ
 //  - set SNSR_SAMPLE_RATE to one of: 25, 50, 100, 200, 400, 800, 1600
 // For ICM42688 < 1kHz range:
-//  - set SNSR_SAMPLE_RATE_UNIT to SNSR_SAMPLE_RATE_UNIT_HZ
-//  - set SNSR_SAMPLE_RATE to one of: 25, 50, 100, 200, 500
-// For ICM42688 >= 1kHz range:
-//  - set SNSR_SAMPLE_RATE_UNIT to SNSR_SAMPLE_RATE_UNIT_KHZ
-//  - set SNSR_SAMPLE_RATE to one of: 1, 2, 4, 8, 16
+//  - set SNSR_SAMPLE_RATE to one of: 25, 50, 100, 200, 500, 1000, 2000, 4000, 8000, 16000
 // !NB! Increasing the sample rate above 500Hz (this may be lower for non MDV formats)
 // with all 6 axes may cause buffer overruns
 //  - Change at your own risk!
 #define SNSR_SAMPLE_RATE        100
-#define SNSR_SAMPLE_RATE_UNIT   SNSR_SAMPLE_RATE_UNIT_HZ // HZ or KHZ
 
 // Accelerometer range in Gs
 // Either sensor supports one of: 2, 4, 8, 16
