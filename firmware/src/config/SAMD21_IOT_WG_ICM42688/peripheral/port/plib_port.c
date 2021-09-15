@@ -88,8 +88,9 @@ void PORT_Initialize(void)
    PORT_REGS->GROUP[0].PORT_PMUX[8] = 0x22;
 
    /************************** GROUP 1 Initialization *************************/
+   PORT_REGS->GROUP[1].PORT_OUT = 0x8;
    PORT_REGS->GROUP[1].PORT_PINCFG[2] = 0x1;
-   PORT_REGS->GROUP[1].PORT_PINCFG[3] = 0x1;
+   PORT_REGS->GROUP[1].PORT_PINCFG[3] = 0x5;
 
    PORT_REGS->GROUP[1].PORT_PMUX[1] = 0x33;
 
