@@ -133,22 +133,14 @@ void icm42688_sensor_event_cb(inv_icm426xx_sensor_event_t * event) {
     }
     
     /* Convert sensor data to buffer type and write to buffer */
-#if SNSR_USE_ACCEL_X
+#if SNSR_USE_ACCEL
     *l_snsr_buffer++ = (snsr_data_t) event->accel[0];
-#endif
-#if SNSR_USE_ACCEL_Y
     *l_snsr_buffer++ = (snsr_data_t) event->accel[1];
-#endif
-#if SNSR_USE_ACCEL_Z
     *l_snsr_buffer++ = (snsr_data_t) event->accel[2];
 #endif
-#if SNSR_USE_GYRO_X
+#if SNSR_USE_GYRO
     *l_snsr_buffer++ = (snsr_data_t) event->gyro[0];
-#endif
-#if SNSR_USE_GYRO_Y
     *l_snsr_buffer++ = (snsr_data_t) event->gyro[1];
-#endif
-#if SNSR_USE_GYRO_Z
     *l_snsr_buffer++ = (snsr_data_t) event->gyro[2];
 #endif
 }

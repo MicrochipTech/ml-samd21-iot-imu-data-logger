@@ -82,12 +82,8 @@
 #define SNSR_GYRO_RANGE         2000
 
 // Define which axes from the IMU to use
-#define SNSR_USE_ACCEL_X        true
-#define SNSR_USE_ACCEL_Y        true
-#define SNSR_USE_ACCEL_Z        true
-#define SNSR_USE_GYRO_X         true
-#define SNSR_USE_GYRO_Y         true
-#define SNSR_USE_GYRO_Z         true
+#define SNSR_USE_ACCEL          true
+#define SNSR_USE_GYRO           true
 
 // Size of sensor buffer in samples (must be power of 2)
 #define SNSR_BUF_LEN            128
@@ -117,12 +113,9 @@
 // Section: Defines derived from user config parameters
 // *****************************************************************************
 // *****************************************************************************
-#define SNSR_NUM_AXES   (SNSR_USE_ACCEL_X + SNSR_USE_ACCEL_Y + SNSR_USE_ACCEL_Z \
-                            + SNSR_USE_GYRO_X + SNSR_USE_GYRO_Y + SNSR_USE_GYRO_Z)
+#define SNSR_NUM_AXES   (3*SNSR_USE_ACCEL + 3*SNSR_USE_GYRO)
 
 /* Define whether multiple sensors types are being used */
-#define SNSR_USE_GYRO   (SNSR_USE_GYRO_X || SNSR_USE_GYRO_Y || SNSR_USE_GYRO_Z)
-#define SNSR_USE_ACCEL  (SNSR_USE_ACCEL_X || SNSR_USE_ACCEL_Y || SNSR_USE_ACCEL_Z)
 #if (SNSR_USE_ACCEL && SNSR_USE_GYRO)
     #define MULTI_SENSOR 1
 #else

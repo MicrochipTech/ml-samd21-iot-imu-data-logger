@@ -115,22 +115,14 @@ int bmi160_sensor_read(struct sensor_device_t *sensor, snsr_data_t *ptr)
         return status;
     
     /* Convert sensor data to buffer type and write to buffer */
-#if SNSR_USE_ACCEL_X
+#if SNSR_USE_ACCEL
     *ptr++ = (snsr_data_t) accel.x;
-#endif
-#if SNSR_USE_ACCEL_Y
     *ptr++ = (snsr_data_t) accel.y;
-#endif
-#if SNSR_USE_ACCEL_Z
     *ptr++ = (snsr_data_t) accel.z;
 #endif
-#if SNSR_USE_GYRO_X
+#if SNSR_USE_GYRO
     *ptr++ = (snsr_data_t) gyro.x;
-#endif
-#if SNSR_USE_GYRO_Y
     *ptr++ = (snsr_data_t) gyro.y;
-#endif
-#if SNSR_USE_GYRO_Z
     *ptr++ = (snsr_data_t) gyro.z;
 #endif
     
@@ -201,7 +193,7 @@ int bmi160_sensor_set_config(struct sensor_device_t *sensor) {
     /* Select the interrupt channel/pin settings */
     int_config.int_pin_settg.output_en = BMI160_ENABLE;// Enabling interrupt pins to act as output pin
     int_config.int_pin_settg.output_mode = BMI160_DISABLE;// Choosing push-pull mode for interrupt pin
-    int_config.int_pin_settg.output_type = BMI160_DISABLE;// Choosing active low output
+    int_config.int_pin_settg.output_type = BMI160_ENABLE;// Choosing active high output
     int_config.int_pin_settg.edge_ctrl = BMI160_ENABLE;// Choosing edge triggered output
     int_config.int_pin_settg.input_en = BMI160_DISABLE;// Disabling interrupt pin to act as input
     int_config.int_pin_settg.latch_dur = BMI160_LATCH_DUR_NONE;// non-latched output
