@@ -33,6 +33,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 // *****************************************************************************
 // *****************************************************************************
@@ -65,7 +66,7 @@
 // IMU sampling rate in units of SNSR_SAMPLE_RATE_UNIT
 // For BMI160:
 //  - set SNSR_SAMPLE_RATE to one of: 25, 50, 100, 200, 400, 800, 1600
-// For ICM42688 < 1kHz range:
+// For ICM42688:
 //  - set SNSR_SAMPLE_RATE to one of: 25, 50, 100, 200, 500, 1000, 2000, 4000, 8000, 16000
 // !NB! Increasing the sample rate above 500Hz (this may be lower for non MDV formats)
 // with all 6 axes may cause buffer overruns
@@ -185,6 +186,8 @@
 #define TC_TimerStart                   TC3_TimerStart
 #define TC_TimerGet_us                  TC3_Timer16bitCounterGet
 #define TC_TimerCallbackRegister(cb)    TC3_TimerCallbackRegister(cb, (uintptr_t) NULL)
+size_t __attribute__(( unused )) UART_Read(uint8_t *ptr, const size_t nbytes);
+size_t __attribute__(( unused )) UART_Write(uint8_t *ptr, const size_t nbytes);
 
 #ifdef	__cplusplus
 extern "C" {

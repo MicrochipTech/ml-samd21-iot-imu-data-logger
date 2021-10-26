@@ -73,7 +73,7 @@ void SERCOM5_Handler() {
     }
 }
 
-static size_t __attribute__(( unused )) UART_Write(uint8_t *ptr, const size_t nbytes) {
+size_t __attribute__(( unused )) UART_Write(uint8_t *ptr, const size_t nbytes) {
     return SERCOM5_USART_Write(ptr, nbytes) ? nbytes : 0;
 }
 
@@ -86,7 +86,7 @@ void Null_Handler() {
     // Do nothing
 }
 
-static size_t __attribute__(( unused )) UART_Read(uint8_t *ptr, const size_t nbytes) {
+size_t __attribute__(( unused )) UART_Read(uint8_t *ptr, const size_t nbytes) {
     return ringbuffer_read(&uartRxBuffer, ptr, nbytes);
 }
 
