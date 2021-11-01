@@ -90,11 +90,11 @@ size_t __attribute__(( unused )) UART_Read(uint8_t *ptr, const size_t nbytes) {
     return ringbuffer_read(&uartRxBuffer, ptr, nbytes);
 }
 
-void Ticker_Callback() {
+static void Ticker_Callback() {
     static uint32_t mstick = 0;
 
     ++tickcounter;
-    if (tickrate == 0) {
+    if (tickrate == 0 || mstick > tickrate) {
         mstick = 0;
     }
     else if (++mstick == tickrate) {
