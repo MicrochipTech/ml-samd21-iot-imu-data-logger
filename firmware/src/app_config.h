@@ -60,7 +60,7 @@
 
 // Data streaming formatting selection
 #ifndef DATA_STREAMER_FORMAT
-#define DATA_STREAMER_FORMAT    DATA_STREAMER_FORMAT_ASCII
+#define DATA_STREAMER_FORMAT    DATA_STREAMER_FORMAT_MDV
 #endif
 
 // IMU sampling rate in units of SNSR_SAMPLE_RATE_UNIT
