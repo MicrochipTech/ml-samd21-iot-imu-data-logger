@@ -147,4 +147,3 @@ This project can be used to generate firmware for streaming data to the [SensiML
 | :--: |
 | *Scan Connected Devices* |
 
-The SAMD21 ML Eval Kit should now be streaming to the DCL. Check out SensiML's [documentation](https://sensiml.com/documentation/) to learn more about how to use the DCL for capturing and annotating data.
